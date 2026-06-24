@@ -1,34 +1,32 @@
-# 어디가까 Frontend
+# React + TypeScript + Vite
 
-어디가까 서비스의 React 기반 프론트엔드 웹 애플리케이션입니다.
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
-## Branch Strategy
+Currently, two official plugins are available:
 
-- main: 최종 배포/안정 브랜치
-- develop: 기능 작업 통합 브랜치
-- feature/*: 기능 작업 브랜치
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Workflow
+## React Compiler
 
-1. develop 브랜치에서 feature 브랜치를 생성합니다.
-2. 작업 완료 후 feature 브랜치에서 develop 브랜치로 Pull Request를 생성합니다.
-3. PR 리뷰 및 검증 후 Squash Merge합니다.
-4. 배포 전 develop 브랜치에서 main 브랜치로 Pull Request를 생성합니다.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Merge Policy
+## Expanding the Oxlint configuration
 
-- Squash Merge만 사용합니다.
-- Merge Commit은 사용하지 않습니다.
-- Rebase Merge는 사용하지 않습니다.
-- 머지 후 feature 브랜치는 자동 삭제합니다.
+If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
 
-## Branch Protection
+```json
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  }
+}
+```
 
-- main, develop 브랜치는 Ruleset으로 보호합니다.
-- 직접 push하지 않고 Pull Request를 통해서만 반영합니다.
-- 프론트 CI 구성 후 필수 status check를 추가할 예정입니다.
-
-## Environment
-
-- 실제 환경변수 파일(.env)은 커밋하지 않습니다.
-- 환경변수 예시는 .env.example에 작성합니다.
+See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
