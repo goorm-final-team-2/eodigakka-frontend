@@ -65,6 +65,23 @@ export default tseslint.config(
       eqeqeq: ['error', 'always'],
       'no-shadow': 'off',
       '@typescript-eslint/no-shadow': 'error',
+
+      // 디자인 토큰 강제 — hex 코드 직접 사용 금지
+      // src/styles/global.css의 Tailwind 토큰을 사용할 것 (bg-primary, text-ink 등)
+      // 외부 라이브러리(Kakao Maps 등)에 hex가 필요한 경우에만 eslint-disable-next-line으로 예외 처리
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "Literal[value=/#[0-9a-fA-F]{3,8}(?![0-9a-fA-F])/]",
+          message:
+            'hex 코드 직접 사용 금지. Tailwind 토큰을 사용하세요 (bg-primary, text-ink 등). 전체 목록: src/styles/global.css',
+        },
+        {
+          selector: "TemplateElement[value.raw=/#[0-9a-fA-F]{3,8}(?![0-9a-fA-F])/]",
+          message:
+            'hex 코드 직접 사용 금지. Tailwind 토큰을 사용하세요 (bg-primary, text-ink 등). 전체 목록: src/styles/global.css',
+        },
+      ],
     },
   },
   prettier,
