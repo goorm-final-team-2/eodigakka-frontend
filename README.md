@@ -132,6 +132,97 @@ import { Appointment } from '@/types/appointment';
 
 ---
 
+## 디자인 토큰 (CSS 테마)
+
+`src/styles/global.css`에 정의된 토큰을 Tailwind 유틸리티로 사용합니다.  
+**hex 코드 직접 사용 금지 — 반드시 아래 토큰 이름으로 스타일링하세요.**
+
+### 색상
+
+```html
+<!-- 배경 -->
+<div class="bg-canvas">흰 배경</div>
+<div class="bg-canvas-parchment">아이보리 배경 (섹션 교차, 푸터)</div>
+<div class="bg-surface-tile-1">다크 타일</div>
+<div class="bg-surface-black">글로벌 내비게이션</div>
+
+<!-- 텍스트 -->
+<p class="text-ink">기본 텍스트</p>
+<p class="text-ink-muted-48">비활성 / 법률 문구</p>
+<p class="text-on-dark">다크 배경 위 텍스트</p>
+
+<!-- 인터랙션 (버튼, 링크) — 오직 이 토큰만 사용 -->
+<button class="bg-primary text-on-primary">기본 버튼</button>
+<a class="text-primary">링크</a>
+<a class="text-primary-on-dark">다크 배경 위 링크</a>
+```
+
+| 토큰 | 색상 | 용도 |
+|------|------|------|
+| `primary` | #0066cc | 버튼, 링크, 포커스 링 — 유일한 인터랙션 색 |
+| `primary-on-dark` | #2997ff | 다크 타일 위 링크 |
+| `ink` | #1d1d1f | 라이트 배경 기본 텍스트 |
+| `ink-muted-48` | #7a7a7a | 비활성, 법률 문구 |
+| `canvas` | #ffffff | 기본 배경 |
+| `canvas-parchment` | #f5f5f7 | 교차 섹션 배경, 푸터 |
+| `surface-tile-1` | #272729 | 다크 타일 |
+| `surface-black` | #000000 | 글로벌 내비게이션 |
+
+전체 색상 목록은 `src/styles/global.css` 참조.
+
+### 타이포그래피
+
+```html
+<!-- 폰트 패밀리 -->
+<h1 class="font-display">헤딩 (SF Pro Display)</h1>
+<p class="font-text">본문 (SF Pro Text)</p>
+
+<!-- 폰트 크기 + 줄간격 (text-* 하나로 동시 적용) -->
+<h1 class="font-display text-hero font-semibold tracking-hero">히어로 헤딩</h1>
+<h2 class="font-display text-display-lg font-semibold">섹션 제목</h2>
+<p class="font-text text-body tracking-body">본문</p>
+<span class="font-text text-caption tracking-caption">캡션</span>
+```
+
+| 토큰 | 크기 | 주요 용도 |
+|------|------|-----------|
+| `text-hero` | 56px | 히어로 헤딩 |
+| `text-display-lg` | 40px | 타일 섹션 제목 |
+| `text-display-md` | 34px | 서브 섹션 제목 |
+| `text-tagline` | 21px | 서브 내비, 태그라인 |
+| `text-body` | 17px | 기본 본문 |
+| `text-caption` | 14px | 캡션, 버튼 레이블 |
+| `text-fine` | 12px | 내비 링크, 파인프린트 |
+
+폰트 굵기: `font-light`(300) · `font-normal`(400) · `font-semibold`(600) · `font-bold`(700)
+
+### 간격 · 라운드 · 그림자
+
+```html
+<!-- 간격 -->
+<section class="py-section">타일 섹션 (상하 80px)</section>
+<div class="p-lg gap-xs">카드 내부</div>
+
+<!-- 라운드 -->
+<button class="rounded-pill">프라이머리 CTA (시그니처 필)</button>
+<div class="rounded-lg">카드</div>
+<button class="rounded-sm">유틸리티 버튼</button>
+
+<!-- 그림자 — 제품 이미지에만 사용 -->
+<img class="shadow-product" src="..." />
+```
+
+| 토큰 | 값 | 용도 |
+|------|-----|------|
+| `spacing-section` | 80px | 타일 상하 패딩 |
+| `spacing-lg` | 24px | 카드 내부 패딩 |
+| `rounded-pill` | 9999px | 프라이머리 버튼, 검색창 |
+| `rounded-lg` | 18px | 카드 |
+| `rounded-sm` | 8px | 유틸리티 버튼 |
+| `shadow-product` | — | 제품 이미지 전용 (카드·버튼에 사용 금지) |
+
+---
+
 ## 폴더 구조
 
 ```
