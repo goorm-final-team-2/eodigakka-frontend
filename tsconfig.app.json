@@ -16,9 +16,8 @@
     "jsx": "react-jsx",
 
     /* 경로 별칭 */
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
 
     /* Linting */
