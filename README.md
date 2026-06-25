@@ -1,6 +1,6 @@
 # 어디가까 — 프론트엔드
 
-약속 조율 모바일 웹 서비스.  
+약속 조율 **모바일 PWA 서비스** (모바일 우선 개발).  
 약속방 생성 → 장소 후보 등록 → 투표 → 최종 장소 확정 → 위치 공유 흐름을 한 페이지에서 관리합니다.
 
 ---
@@ -16,6 +16,55 @@
 | 클라이언트 상태 | Zustand 5                                                    |
 | HTTP            | Axios                                                        |
 | 지도            | Kakao Maps JavaScript API                                    |
+
+---
+
+## 모바일 우선 개발 원칙
+
+**PC 웹이 아닌 모바일 앱이 메인 타겟입니다.** 모든 UI는 모바일 기준으로 먼저 만들고, PC는 나중에 고려합니다.
+
+### 기준 뷰포트
+
+| 구분 | 범위 | 비고 |
+|------|------|------|
+| 개발 기준 | 360px ~ 430px | Android 소형 ~ iPhone Pro Max |
+| 권장 테스트 기기 | iPhone 14 Pro (393px) | Chrome DevTools에서 시뮬레이션 가능 |
+
+Chrome DevTools → 기기 툴바(⌘⇧M) → **iPhone 14 Pro** 선택 후 개발하세요.
+
+### 터치 환경 필수 규칙
+
+- **hover 사용 금지** — 터치 화면에서는 hover 상태가 없습니다. `:hover`에만 의존하는 인터랙션은 구현하지 마세요.
+- **최소 터치 타겟 44×44px** — 버튼, 링크, 아이콘 등 탭 가능한 요소의 최소 크기입니다.
+- **`cursor: pointer` 불필요** — 전역으로 자동 적용됩니다.
+
+### Safe Area (iPhone 노치 / 홈 인디케이터)
+
+iPhone은 상단에 Dynamic Island(노치), 하단에 홈 인디케이터가 있어 UI가 가려질 수 있습니다.  
+고정(fixed) 요소를 만들 때 반드시 safe area 유틸리티를 사용하세요.
+
+```html
+<!-- 상단 고정 헤더 — 노치 아래로 내려오게 -->
+<header class="fixed top-0 inset-x-0 pt-safe bg-surface-black">...</header>
+
+<!-- 하단 탭 내비게이션 — 홈 인디케이터 위로 올라오게 -->
+<nav class="fixed bottom-0 inset-x-0 pb-safe bg-canvas">...</nav>
+
+<!-- 하단 탭바 + 홈 인디케이터 높이를 한 번에 처리 -->
+<nav class="fixed bottom-0 inset-x-0 pb-safe-nav">...</nav>
+
+<!-- 콘텐츠 영역 — 상하 fixed 요소 높이 제외한 최소 높이 -->
+<main class="min-h-content">...</main>
+```
+
+| 유틸리티 | 용도 |
+|----------|------|
+| `pt-safe` | 상단 노치 회피 |
+| `pb-safe` | 하단 홈 인디케이터 회피 |
+| `pb-safe-nav` | 하단 탭바 높이 + 홈 인디케이터 합산 |
+| `min-h-content` | 콘텐츠 영역 최소 높이 (상하 fixed 요소 제외) |
+
+> Safe area가 작동하려면 `index.html`의 `viewport-fit=cover`가 필수입니다. 이미 설정되어 있습니다.
 
 ---
 
@@ -220,6 +269,16 @@ import { Appointment } from '@/types/appointment';
 | `rounded-lg` | 18px | 카드 |
 | `rounded-sm` | 8px | 유틸리티 버튼 |
 | `shadow-product` | — | 제품 이미지 전용 (카드·버튼에 사용 금지) |
+
+### 컴포넌트 높이
+
+| 변수 | 값 | 용도 |
+|------|----|------|
+| `--height-nav` | 44px | 상단 내비게이션 |
+| `--height-bottom-nav` | 56px | 하단 탭 내비게이션 |
+| `--height-sticky-bar` | 64px | 하단 플로팅 바 |
+
+사용법: `h-[var(--height-bottom-nav)]`
 
 ---
 
