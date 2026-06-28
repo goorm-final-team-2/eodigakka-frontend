@@ -9,8 +9,7 @@ const RoomVotePage = () => {
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const [snap, setSnap] = useState<SnapPoint>('hidden');
 
-  // TODO: appointmentId로 약속방 정보 조회 (2단계에서 구현)
-  void appointmentId;
+  if (!appointmentId) return null;
 
   return (
     <div className="fixed inset-0 bg-canvas-parchment">
@@ -19,7 +18,11 @@ const RoomVotePage = () => {
 
       {/* 바텀시트 */}
       <BottomSheet snap={snap} onSnapChange={setSnap}>
-        <PlaceCandidateSheet snap={snap} onSnapChange={setSnap} />
+        <PlaceCandidateSheet
+          appointmentId={Number(appointmentId)}
+          snap={snap}
+          onSnapChange={setSnap}
+        />
       </BottomSheet>
     </div>
   );

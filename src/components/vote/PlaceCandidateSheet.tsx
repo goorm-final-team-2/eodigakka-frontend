@@ -1,21 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { SnapPoint } from '@/components/common/BottomSheet';
+import { useAddCandidate } from '@/hooks/useCandidates';
+import { useMapStore } from '@/stores/mapStore';
 import type { KakaoPlace } from '@/types/place';
 
 type SheetMode = 'idle' | 'results' | 'detail';
 
 type PlaceCandidateSheetProps = {
+  appointmentId: number;
   snap: SnapPoint;
   onSnapChange: (snap: SnapPoint) => void;
 };
 
-const PlaceCandidateSheet = ({ snap, onSnapChange }: PlaceCandidateSheetProps) => {
+const PlaceCandidateSheet = ({ appointmentId, snap, onSnapChange }: PlaceCandidateSheetProps) => {
   const [mode, setMode] = useState<SheetMode>('idle');
   const [keyword, setKeyword] = useState('');
   const [results, setResults] = useState<KakaoPlace[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<KakaoPlace | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+
+  const { mutate: addCandidate, isPending: isAdding } = useAddCandidate(appointmentId);
+  const panTo = useMapStore((s) => s.panTo);
+  const mapInstance = useMapStore((s) => s.mapInstance);
 
   const miniMapRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,6 +90,38 @@ const PlaceCandidateSheet = ({ snap, onSnapChange }: PlaceCandidateSheetProps) =
     setKeyword('');
     setSelectedPlace(null);
     onSnapChange('partial');
+  };
+
+  const handleRecommend = () => {
+    if (!selectedPlace) return;
+
+    const lat = Number(selectedPlace.y);
+    const lng = Number(selectedPlace.x);
+
+    addCandidate(
+      {
+        kakaoPlaceId: selectedPlace.id,
+        name: selectedPlace.place_name,
+        address: selectedPlace.address_name,
+        roadAddress: selectedPlace.road_address_name || undefined,
+        latitude: lat,
+        longitude: lng,
+        category: selectedPlace.category_name || undefined,
+        placeUrl: selectedPlace.place_url || undefined,
+        phone: selectedPlace.phone || undefined,
+      },
+      {
+        onSuccess: () => {
+          // 배경 지도: 마커 추가 + 중심 이동
+          if (mapInstance && window.kakao?.maps) {
+            const position = new window.kakao.maps.LatLng(lat, lng);
+            new window.kakao.maps.Marker({ position, map: mapInstance });
+          }
+          panTo(lat, lng);
+          handleBackToIdle();
+        },
+      },
+    );
   };
 
   return (
@@ -190,13 +229,13 @@ const PlaceCandidateSheet = ({ snap, onSnapChange }: PlaceCandidateSheetProps) =
                   )}
                 </div>
                 <div className="px-4 pb-4 flex flex-col gap-2">
-                  {/* TODO: 2단계 — POST /appointments/:id/candidates 연동 후 배경 지도에 핀 추가 및 중심 재조정 */}
                   <button
                     type="button"
-                    className="w-full py-3 rounded-pill bg-primary text-sm font-semibold text-on-primary"
-                    onClick={() => {}}
+                    className="w-full py-3 rounded-pill bg-primary text-sm font-semibold text-on-primary disabled:opacity-50"
+                    onClick={handleRecommend}
+                    disabled={isAdding}
                   >
-                    이 장소 추천하기
+                    {isAdding ? '추천 중...' : '이 장소 추천하기'}
                   </button>
                   <a
                     href={selectedPlace.place_url}
@@ -228,13 +267,13 @@ const PlaceCandidateSheet = ({ snap, onSnapChange }: PlaceCandidateSheetProps) =
                   )}
                 </div>
                 <div className="flex-none flex flex-col gap-1.5 pt-0.5">
-                  {/* TODO: 2단계 — POST /appointments/:id/candidates 연동 후 배경 지도에 핀 추가 및 중심 재조정 */}
                   <button
                     type="button"
-                    className="px-3 py-2 rounded-pill bg-primary text-xs font-semibold text-on-primary whitespace-nowrap"
-                    onClick={() => {}}
+                    className="px-3 py-2 rounded-pill bg-primary text-xs font-semibold text-on-primary whitespace-nowrap disabled:opacity-50"
+                    onClick={handleRecommend}
+                    disabled={isAdding}
                   >
-                    추천하기
+                    {isAdding ? '추천 중...' : '추천하기'}
                   </button>
                   <a
                     href={selectedPlace.place_url}
