@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { SnapPoint } from '@/components/common/BottomSheet';
-import { useAddCandidate } from '@/hooks/useCandidates';
+import CandidateList from '@/components/vote/CandidateList';
+import { useAddCandidate, useCandidates } from '@/hooks/useCandidates';
 import { useMapStore } from '@/stores/mapStore';
 import type { KakaoPlace } from '@/types/place';
 
@@ -21,12 +22,44 @@ const PlaceCandidateSheet = ({ appointmentId, snap, onSnapChange }: PlaceCandida
   const [isSearching, setIsSearching] = useState(false);
 
   const { mutate: addCandidate, isPending: isAdding } = useAddCandidate(appointmentId);
+  const { data: candidates, isLoading: isCandidatesLoading } = useCandidates(appointmentId);
   const panTo = useMapStore((s) => s.panTo);
   const mapInstance = useMapStore((s) => s.mapInstance);
 
   const miniMapRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const miniMapInstanceRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const candidateMarkersRef = useRef<any[]>([]);
+
+  // 후보 목록 로드 시 배경 지도에 마커 일괄 추가 + 모든 핀이 보이도록 bounds 조정
+  useEffect(() => {
+    if (!candidates || !mapInstance || !window.kakao?.maps) return;
+
+    // 기존 마커 제거 후 재생성 (refetch 시 중복 방지)
+    candidateMarkersRef.current.forEach((m) => m.setMap(null));
+    candidateMarkersRef.current = candidates.map((c) => {
+      const position = new window.kakao.maps.LatLng(c.latitude, c.longitude);
+
+      return new window.kakao.maps.Marker({ position, map: mapInstance });
+    });
+
+    if (candidates.length === 0) return;
+
+    if (candidates.length === 1) {
+      mapInstance.setCenter(
+        new window.kakao.maps.LatLng(candidates[0].latitude, candidates[0].longitude),
+      );
+      return;
+    }
+
+    // 모든 핀을 포함하는 bounds로 지도 조정 (하단 바텀시트 여백 고려)
+    const bounds = new window.kakao.maps.LatLngBounds();
+    candidates.forEach((c) => {
+      bounds.extend(new window.kakao.maps.LatLng(c.latitude, c.longitude));
+    });
+    mapInstance.setBounds(bounds, 60, 60, 220, 60);
+  }, [candidates, mapInstance]);
 
   // 상세 뷰 미니맵 초기화
   // 배경 지도와 독립된 별도 Map 인스턴스 사용
@@ -125,7 +158,15 @@ const PlaceCandidateSheet = ({ appointmentId, snap, onSnapChange }: PlaceCandida
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        minHeight: 0,
+        overflow: 'hidden',
+      }}
+    >
       {/* ── 검색바 ── */}
       <div className="flex-none px-4 pt-2 pb-3 border-b border-hairline">
         {mode !== 'idle' && (
@@ -158,7 +199,15 @@ const PlaceCandidateSheet = ({ appointmentId, snap, onSnapChange }: PlaceCandida
       </div>
 
       {/* ── 콘텐츠 영역 ── */}
-      <div className="flex-1 overflow-y-auto overscroll-contain">
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: snap !== 'hidden' ? 'auto' : 'hidden',
+          overscrollBehavior: 'contain',
+          touchAction: 'pan-y',
+        }}
+      >
         {/* 검색 결과 */}
         {mode === 'results' && (
           <div>
@@ -289,16 +338,19 @@ const PlaceCandidateSheet = ({ appointmentId, snap, onSnapChange }: PlaceCandida
           </div>
         )}
 
-        {/* 기본 상태 — 추천 장소 목록 (2단계에서 구현) */}
+        {/* 기본 상태 — 추천 장소 목록 */}
         {mode === 'idle' && (
-          <div className="px-4 py-4">
-            <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-hairline">
               <h2 className="text-sm font-semibold text-ink">추천 장소</h2>
-              {/* TODO: 3단계 구현 시 후보 수 뱃지 */}
+              {candidates && candidates.length > 0 && (
+                <span className="text-xs text-ink-muted-48">{candidates.length}곳</span>
+              )}
             </div>
-            <p className="py-8 text-center text-sm text-ink-muted-48">
-              장소를 검색해서 추천해보세요
-            </p>
+            <CandidateList
+              candidates={Array.isArray(candidates) ? candidates : []}
+              isLoading={isCandidatesLoading}
+            />
           </div>
         )}
       </div>

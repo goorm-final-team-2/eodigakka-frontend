@@ -8,57 +8,56 @@ type BottomSheetProps = {
   children: ReactNode;
 };
 
-const SNAP_VISIBLE: Record<SnapPoint, number> = {
-  hidden: 0,
+const HIDDEN_PEEK_PX = 36;
+const SNAP_ORDER: SnapPoint[] = ['hidden', 'peek', 'partial', 'full'];
+const TAP_MAX_MOVE = 8;
+const VELOCITY_THRESHOLD = 0.3;
+
+const SNAP_HEIGHT_PCT: Record<SnapPoint, number> = {
+  hidden: 0, // HIDDEN_PEEK_PX로 덮어씀
   peek: 25,
   partial: 50,
   full: 92,
 };
 
-const HIDDEN_PEEK_PX = 36;
-const SNAP_ORDER: SnapPoint[] = ['hidden', 'peek', 'partial', 'full'];
-const TAP_MAX_MOVE = 8;
-const VELOCITY_THRESHOLD = 0.3; // px/ms
-
-// 컴포넌트 외부에서 정의 → useEffect 클로저에서 항상 최신값 사용
-function getTranslate(s: SnapPoint): string {
-  return s === 'hidden' ? `calc(100% - ${HIDDEN_PEEK_PX}px)` : `${100 - SNAP_VISIBLE[s]}%`;
+function getSnapHeight(s: SnapPoint): string {
+  if (s === 'hidden') return `${HIDDEN_PEEK_PX}px`;
+  return `${SNAP_HEIGHT_PCT[s]}dvh`;
 }
 
-function getVisiblePct(s: SnapPoint): number {
-  return s === 'hidden' ? (HIDDEN_PEEK_PX / window.innerHeight) * 100 : SNAP_VISIBLE[s];
+function getSnapHeightPx(s: SnapPoint): number {
+  if (s === 'hidden') return HIDDEN_PEEK_PX;
+  return (window.innerHeight * SNAP_HEIGHT_PCT[s]) / 100;
 }
 
 const BottomSheet = ({ snap, onSnapChange, children }: BottomSheetProps) => {
   const sheetRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<HTMLDivElement>(null);
-  // 이벤트 핸들러에서 항상 최신 snap 읽기 위한 ref
   const snapRef = useRef<SnapPoint>(snap);
   useLayoutEffect(() => {
     snapRef.current = snap;
   });
 
-  // snap prop 변경 시 애니메이션으로 이동
+  // snap prop 변경 시 애니메이션으로 높이 조정
   useEffect(() => {
     const el = sheetRef.current;
     if (!el) return;
-    el.style.transition = 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)';
-    el.style.transform = `translateY(${getTranslate(snap)})`;
+    el.style.transition = 'height 0.35s cubic-bezier(0.32, 0.72, 0, 1)';
+    el.style.height = getSnapHeight(snap);
   }, [snap]);
 
   const snapTo = useCallback(
     (next: SnapPoint) => {
       const el = sheetRef.current;
       if (el) {
-        el.style.transition = 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)';
-        el.style.transform = `translateY(${getTranslate(next)})`;
+        el.style.transition = 'height 0.35s cubic-bezier(0.32, 0.72, 0, 1)';
+        el.style.height = getSnapHeight(next);
       }
       if (next !== snapRef.current) onSnapChange(next);
     },
     [onSnapChange],
   );
 
-  // 네이티브 이벤트 리스너: passive: false → preventDefault() 가능, 브라우저 스크롤 가로채기 방지
   useEffect(() => {
     const handle = handleRef.current;
     if (!handle) return;
@@ -83,7 +82,7 @@ const BottomSheet = ({ snap, onSnapChange, children }: BottomSheetProps) => {
 
     const onDragMove = (clientY: number, e: Event) => {
       e.preventDefault();
-      const dy = clientY - startY;
+      const dy = clientY - startY; // 양수 = 아래로 드래그 = 높이 감소
       maxMove = Math.max(maxMove, Math.abs(dy));
       lastY = clientY;
       lastTime = Date.now();
@@ -91,17 +90,18 @@ const BottomSheet = ({ snap, onSnapChange, children }: BottomSheetProps) => {
       const el = sheetRef.current;
       if (!el) return;
 
-      const baseVisible = getVisiblePct(startSnap);
-      const deltaPercent = (dy / window.innerHeight) * 100;
-      const newTranslate = Math.max(8, Math.min(100, 100 - baseVisible + deltaPercent));
-      el.style.transform = `translateY(${newTranslate}%)`;
+      const baseHeightPx = getSnapHeightPx(startSnap);
+      const newHeightPx = Math.max(
+        HIDDEN_PEEK_PX,
+        Math.min(window.innerHeight * 0.96, baseHeightPx - dy),
+      );
+      el.style.height = `${newHeightPx}px`;
     };
 
     const onDragEnd = (clientY: number) => {
       isDragging = false;
       const dy = clientY - startY;
 
-      // 탭 판정
       if (maxMove <= TAP_MAX_MOVE) {
         if (snapRef.current === 'hidden') snapTo('peek');
         return;
@@ -109,9 +109,8 @@ const BottomSheet = ({ snap, onSnapChange, children }: BottomSheetProps) => {
 
       const currentIndex = SNAP_ORDER.indexOf(startSnap);
       const dt = Math.max(1, Date.now() - lastTime);
-      const velocity = (clientY - lastY) / dt; // positive = 아래 방향
+      const velocity = (clientY - lastY) / dt;
 
-      // 방향 기반: 40px 이상 드래그 or 빠른 플릭 → 한 단계 이동
       const DRAG_THRESHOLD = 40;
       let targetIndex = currentIndex;
 
@@ -124,12 +123,10 @@ const BottomSheet = ({ snap, onSnapChange, children }: BottomSheetProps) => {
       snapTo(SNAP_ORDER[targetIndex]);
     };
 
-    // Touch 이벤트
     const onTouchStart = (e: globalThis.TouchEvent) => onDragStart(e.touches[0].clientY);
     const onTouchMove = (e: globalThis.TouchEvent) => onDragMove(e.touches[0].clientY, e);
     const onTouchEnd = (e: globalThis.TouchEvent) => onDragEnd(e.changedTouches[0].clientY);
 
-    // Mouse 이벤트 (PC 지원)
     const onMouseDown = (e: globalThis.MouseEvent) => onDragStart(e.clientY);
     const onMouseMove = (e: globalThis.MouseEvent) => {
       if (!isDragging) return;
@@ -143,7 +140,6 @@ const BottomSheet = ({ snap, onSnapChange, children }: BottomSheetProps) => {
     handle.addEventListener('touchstart', onTouchStart, { passive: true });
     handle.addEventListener('touchmove', onTouchMove, { passive: false });
     handle.addEventListener('touchend', onTouchEnd, { passive: true });
-
     handle.addEventListener('mousedown', onMouseDown);
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
@@ -152,7 +148,6 @@ const BottomSheet = ({ snap, onSnapChange, children }: BottomSheetProps) => {
       handle.removeEventListener('touchstart', onTouchStart);
       handle.removeEventListener('touchmove', onTouchMove);
       handle.removeEventListener('touchend', onTouchEnd);
-
       handle.removeEventListener('mousedown', onMouseDown);
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
@@ -164,10 +159,9 @@ const BottomSheet = ({ snap, onSnapChange, children }: BottomSheetProps) => {
       ref={sheetRef}
       className="fixed inset-x-0 bottom-0 z-10 flex flex-col bg-canvas rounded-t-2xl"
       style={{
-        height: '100dvh',
-        transform: `translateY(${getTranslate(snap)})`,
+        height: getSnapHeight(snap),
         boxShadow: '0 -4px 24px rgba(0,0,0,0.12)',
-        willChange: 'transform',
+        willChange: 'height',
       }}
     >
       {/* 드래그 핸들 */}
@@ -180,7 +174,17 @@ const BottomSheet = ({ snap, onSnapChange, children }: BottomSheetProps) => {
       </div>
 
       {/* 콘텐츠 */}
-      <div className="flex-1 overflow-y-auto overscroll-contain">{children}</div>
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 };

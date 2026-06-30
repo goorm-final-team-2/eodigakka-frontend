@@ -17,10 +17,8 @@ export const useAddCandidate = (appointmentId: number) => {
   });
 };
 
-// [2-3]에서 구현
 export const useCandidates = (appointmentId: number) =>
   useQuery({
     queryKey: QUERY_KEYS.candidates(appointmentId),
     queryFn: () => getCandidates(appointmentId),
-    enabled: false, // [2-3]에서 활성화
   });

@@ -1,5 +1,6 @@
 import apiClient from './index';
 
+import type { ApiResponse } from '@/types/api';
 import type { PlaceCandidateRequest, PlaceCandidateResponse } from '@/types/place';
 
 export const addCandidate = (
@@ -7,13 +8,15 @@ export const addCandidate = (
   body: PlaceCandidateRequest,
 ): Promise<PlaceCandidateResponse> =>
   apiClient
-    .post<PlaceCandidateResponse>(`/appointments/${appointmentId}/place-candidates`, body)
-    .then((res) => res.data);
+    .post<
+      ApiResponse<PlaceCandidateResponse>
+    >(`/appointments/${appointmentId}/place-candidates`, body)
+    .then((res) => res.data.data);
 
 export const getCandidates = (appointmentId: number): Promise<PlaceCandidateResponse[]> =>
   apiClient
-    .get<PlaceCandidateResponse[]>(`/appointments/${appointmentId}/place-candidates`)
-    .then((res) => res.data);
+    .get<ApiResponse<PlaceCandidateResponse[]>>(`/appointments/${appointmentId}/place-candidates`)
+    .then((res) => res.data.data);
 
 export const deleteCandidate = (appointmentId: number, placeCandidateId: number): Promise<void> =>
   apiClient
