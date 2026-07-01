@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { SnapPoint } from '@/components/common/BottomSheet';
 import CandidateList from '@/components/vote/CandidateList';
 import { useAddCandidate, useCandidates } from '@/hooks/useCandidates';
+import { useVoteResults } from '@/hooks/useVotes';
 import { useMapStore } from '@/stores/mapStore';
 import type { KakaoPlace } from '@/types/place';
 
@@ -23,6 +24,7 @@ const PlaceCandidateSheet = ({ appointmentId, snap, onSnapChange }: PlaceCandida
 
   const { mutate: addCandidate, isPending: isAdding } = useAddCandidate(appointmentId);
   const { data: candidates, isLoading: isCandidatesLoading } = useCandidates(appointmentId);
+  const { data: voteResults } = useVoteResults(appointmentId);
   const panTo = useMapStore((s) => s.panTo);
   const mapInstance = useMapStore((s) => s.mapInstance);
 
@@ -350,6 +352,8 @@ const PlaceCandidateSheet = ({ appointmentId, snap, onSnapChange }: PlaceCandida
             <CandidateList
               candidates={Array.isArray(candidates) ? candidates : []}
               isLoading={isCandidatesLoading}
+              voteResults={voteResults ?? []}
+              appointmentId={appointmentId}
             />
           </div>
         )}
