@@ -7,6 +7,10 @@ type CandidateListProps = {
   isLoading: boolean;
   voteResults: VoteResult[];
   appointmentId: number;
+  isHost: boolean;
+  isConfirmed: boolean;
+  topVotedCandidateId: number | null;
+  onConfirm: (placeCandidateId: number) => void;
 };
 
 const CandidateList = ({
@@ -14,6 +18,10 @@ const CandidateList = ({
   isLoading,
   voteResults,
   appointmentId,
+  isHost,
+  isConfirmed,
+  topVotedCandidateId,
+  onConfirm,
 }: CandidateListProps) => {
   if (isLoading) {
     return <p className="px-4 py-8 text-center text-sm text-ink-muted-48">불러오는 중...</p>;
@@ -36,6 +44,10 @@ const CandidateList = ({
             rank={idx + 1}
             voteResult={voteResults.find((v) => v.placeCandidateId === c.id)}
             appointmentId={appointmentId}
+            isHost={isHost}
+            isConfirmed={isConfirmed}
+            isTopVoted={topVotedCandidateId === c.id}
+            onConfirm={onConfirm}
           />
         </li>
       ))}

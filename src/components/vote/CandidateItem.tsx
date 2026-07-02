@@ -7,16 +7,33 @@ type CandidateItemProps = {
   rank: number;
   voteResult: VoteResult | undefined;
   appointmentId: number;
+  isHost: boolean;
+  isConfirmed: boolean;
+  isTopVoted: boolean;
+  onConfirm: (placeCandidateId: number) => void;
 };
 
-const CandidateItem = ({ candidate: c, rank, voteResult, appointmentId }: CandidateItemProps) => {
+const CandidateItem = ({
+  candidate: c,
+  rank,
+  voteResult,
+  appointmentId,
+  isHost,
+  isConfirmed,
+  isTopVoted,
+  onConfirm,
+}: CandidateItemProps) => {
   const { mutate: toggleVote, isPending } = useToggleVote(appointmentId);
 
   const votedByMe = voteResult?.votedByMe ?? false;
   const voteCount = voteResult?.voteCount ?? 0;
 
   return (
-    <div className="flex items-start gap-3 px-4 py-3 border-b border-hairline">
+    <div
+      className={`flex items-start gap-3 px-4 py-3 border-b border-hairline ${
+        isTopVoted ? 'bg-primary/5' : ''
+      }`}
+    >
       <span className="flex-none w-6 h-6 mt-0.5 flex items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary">
         {rank}
       </span>
@@ -37,9 +54,18 @@ const CandidateItem = ({ candidate: c, rank, voteResult, appointmentId }: Candid
             지도 보기
           </a>
         )}
+        {isHost && !isConfirmed && (
+          <button
+            type="button"
+            onClick={() => onConfirm(c.id)}
+            className="px-3 py-1.5 rounded-pill border border-primary text-xs font-semibold text-primary whitespace-nowrap"
+          >
+            확정
+          </button>
+        )}
         <button
           type="button"
-          disabled={isPending}
+          disabled={isPending || isConfirmed}
           onClick={() => toggleVote({ placeCandidateId: c.id })}
           className={`px-3 py-1.5 rounded-pill text-xs font-semibold whitespace-nowrap disabled:opacity-50 ${
             votedByMe ? 'bg-primary text-on-primary' : 'border border-hairline text-ink'
