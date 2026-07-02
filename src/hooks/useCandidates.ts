@@ -13,6 +13,9 @@ export const useAddCandidate = (appointmentId: number) => {
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.candidates(appointmentId),
       });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.voteResults(appointmentId),
+      });
     },
   });
 };

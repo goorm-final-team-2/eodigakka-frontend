@@ -18,6 +18,9 @@ export const useToggleVote = (appointmentId: number) => {
       void queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.voteResults(appointmentId),
       });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.candidates(appointmentId),
+      });
     },
   });
 };
