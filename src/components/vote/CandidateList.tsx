@@ -10,6 +10,7 @@ type CandidateListProps = {
   isHost: boolean;
   isConfirmed: boolean;
   topVotedCandidateId: number | null;
+  confirmedCandidateId: number | null;
   onConfirm: (placeCandidateId: number) => void;
 };
 
@@ -21,6 +22,7 @@ const CandidateList = ({
   isHost,
   isConfirmed,
   topVotedCandidateId,
+  confirmedCandidateId,
   onConfirm,
 }: CandidateListProps) => {
   if (isLoading) {
@@ -47,6 +49,7 @@ const CandidateList = ({
             isHost={isHost}
             isConfirmed={isConfirmed}
             isTopVoted={topVotedCandidateId === c.id}
+            isConfirmedCandidate={confirmedCandidateId === c.id}
             onConfirm={onConfirm}
           />
         </li>

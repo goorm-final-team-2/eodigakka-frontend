@@ -143,6 +143,7 @@ const PlaceCandidateSheet = ({
       ? [...voteResults].sort((a, b) => b.voteCount - a.voteCount)[0]
       : null;
   const topVotedCandidateId = topVote && topVote.voteCount > 0 ? topVote.placeCandidateId : null;
+  const confirmedCandidateId = confirmedPlace?.placeCandidateId ?? null;
 
   const handleConfirm = (placeCandidateId: number) => {
     setPendingConfirmId(placeCandidateId);
@@ -443,6 +444,7 @@ const PlaceCandidateSheet = ({
                 isHost={isHost ?? false}
                 isConfirmed={isConfirmed ?? false}
                 topVotedCandidateId={topVotedCandidateId}
+                confirmedCandidateId={confirmedCandidateId}
                 onConfirm={handleConfirm}
               />
             </div>

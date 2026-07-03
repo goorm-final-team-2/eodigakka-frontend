@@ -10,6 +10,7 @@ type CandidateItemProps = {
   isHost: boolean;
   isConfirmed: boolean;
   isTopVoted: boolean;
+  isConfirmedCandidate: boolean;
   onConfirm: (placeCandidateId: number) => void;
 };
 
@@ -21,6 +22,7 @@ const CandidateItem = ({
   isHost,
   isConfirmed,
   isTopVoted,
+  isConfirmedCandidate,
   onConfirm,
 }: CandidateItemProps) => {
   const { mutate: toggleVote, isPending } = useToggleVote(appointmentId);
@@ -31,14 +33,25 @@ const CandidateItem = ({
   return (
     <div
       className={`flex items-start gap-3 px-4 py-3 border-b border-hairline ${
-        isTopVoted ? 'bg-primary/5' : ''
+        isConfirmedCandidate
+          ? 'bg-primary/10 border-l-2 border-l-primary'
+          : isTopVoted
+            ? 'bg-primary/5'
+            : ''
       }`}
     >
       <span className="flex-none w-6 h-6 mt-0.5 flex items-center justify-center rounded-full bg-primary text-xs font-bold text-on-primary">
         {rank}
       </span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-ink truncate">{c.name}</p>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <p className="text-sm font-semibold text-ink truncate">{c.name}</p>
+          {isConfirmedCandidate && (
+            <span className="flex-none text-xs font-bold text-primary bg-primary/15 px-1.5 py-0.5 rounded-pill">
+              확정
+            </span>
+          )}
+        </div>
         <p className="text-xs text-ink-muted-48 mt-0.5 truncate">{c.roadAddress ?? c.address}</p>
         {c.category && <p className="text-xs text-ink-muted-48 mt-0.5 truncate">{c.category}</p>}
         <p className="text-xs text-ink-muted-48 mt-1">{voteCount}명 투표</p>
