@@ -265,14 +265,15 @@ const PlaceCandidateSheet = ({
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="장소를 검색하세요"
-              className="flex-1 px-4 py-2 rounded-pill border border-hairline bg-canvas-parchment text-ink text-sm outline-none focus:border-primary"
+              onKeyDown={(e) => e.key === 'Enter' && !isConfirmed && handleSearch()}
+              placeholder={isConfirmed ? '장소가 확정되었습니다' : '장소를 검색하세요'}
+              disabled={isConfirmed}
+              className="flex-1 px-4 py-2 rounded-pill border border-hairline bg-canvas-parchment text-ink text-sm outline-none focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <button
               type="button"
               onClick={handleSearch}
-              disabled={isSearching}
+              disabled={isSearching || isConfirmed}
               className="px-4 py-2 rounded-pill bg-primary text-sm font-semibold text-on-primary disabled:opacity-50"
             >
               {isSearching ? '검색 중' : '검색'}
@@ -364,7 +365,7 @@ const PlaceCandidateSheet = ({
                       type="button"
                       className="w-full py-3 rounded-pill bg-primary text-sm font-semibold text-on-primary disabled:opacity-50"
                       onClick={handleRecommend}
-                      disabled={isAdding}
+                      disabled={isAdding || isConfirmed}
                     >
                       {isAdding ? '추천 중...' : '이 장소 추천하기'}
                     </button>
@@ -402,7 +403,7 @@ const PlaceCandidateSheet = ({
                       type="button"
                       className="px-3 py-2 rounded-pill bg-primary text-xs font-semibold text-on-primary whitespace-nowrap disabled:opacity-50"
                       onClick={handleRecommend}
-                      disabled={isAdding}
+                      disabled={isAdding || isConfirmed}
                     >
                       {isAdding ? '추천 중...' : '추천하기'}
                     </button>
