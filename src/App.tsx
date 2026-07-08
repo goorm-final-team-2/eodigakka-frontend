@@ -15,8 +15,8 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // 성우님이 배포 환경 주소로 만들어둔 api 주소로 요청을 보냅니다!
-    // 쿠키 인증을 위해 credentials: "include" 설정을 꼭 넣어줍니다.
+    // 백엔드 개발 서버 URL로 요청을 보냅니다.
+    // 쿠키 인증을 위해 credentials: "include" 설정을 유지합니다.
     fetch('https://api.eodigakka.xyz/api/appointments', {
       method: 'GET',
       headers: {
@@ -109,22 +109,6 @@ export default function App() {
             </div>
           ))
         )}
-      </div>
-
-      {/* 하단 탭 바 (고정) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-3 px-6 flex justify-around text-gray-400 text-xs shadow-lg">
-        <div className="flex flex-col items-center gap-1 text-orange-500 cursor-pointer">
-          <span className="text-lg">🏠</span>
-          <span>홈</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 cursor-pointer hover:text-gray-600">
-          <span className="text-lg">🗺️</span>
-          <span>지도공유</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 cursor-pointer hover:text-gray-600">
-          <span className="text-lg">👤</span>
-          <span>내정보</span>
-        </div>
       </div>
     </div>
   );
