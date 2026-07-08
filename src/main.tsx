@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router';
 
 import './index.css';
 import router from './router';
+import './styles/global.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
