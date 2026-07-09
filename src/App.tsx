@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router';
 
 import AppointmentFormModal from '@/components/appointment/AppointmentFormModal';
 import { ROUTES } from '@/constants/routes';
-import { useAppointments } from '@/hooks/useAppointments';
+import { useAppointments, useDeleteAppointment } from '@/hooks/useAppointments';
 
 export default function App() {
   const { data: rooms = [], isLoading, isError } = useAppointments();
+  const { mutate: deleteRoom, isPending: isDeleting } = useDeleteAppointment();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -80,6 +81,29 @@ export default function App() {
                   📍 {room.preferredArea}
                 </span>
               </div>
+              {room.role === 'HOST' && (
+                <div className="mt-3 flex justify-end">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (window.confirm(`"${room.title}" 약속방을 삭제하시겠습니까?`)) {
+                        deleteRoom(room.id, {
+                          onError: (err) => {
+                            const msg =
+                              (err as { response?: { data?: { message?: string } } })?.response
+                                ?.data?.message ?? '약속방 삭제에 실패했습니다.';
+                            alert(msg);
+                          },
+                        });
+                      }
+                    }}
+                    disabled={isDeleting}
+                    className="text-xs text-ink-muted-48 hover:text-red-500 transition-colors disabled:opacity-40"
+                  >
+                    삭제
+                  </button>
+                </div>
+              )}
             </div>
           ))
         )}

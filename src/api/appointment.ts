@@ -39,3 +39,7 @@ export const joinAppointmentAsGuest = (body: GuestJoinRequest): Promise<GuestJoi
   apiClient
     .post<ApiResponse<GuestJoinResponse>>('/appointments/guests', body)
     .then((res) => res.data.data);
+
+// DELETE /api/appointments/{id} — 약속방 삭제 (방장 전용)
+export const deleteAppointment = (appointmentId: number): Promise<void> =>
+  apiClient.delete(`/appointments/${appointmentId}`).then(() => undefined);
