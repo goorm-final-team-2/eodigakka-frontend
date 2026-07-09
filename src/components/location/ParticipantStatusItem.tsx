@@ -21,17 +21,17 @@ export function ParticipantStatusItem({ participant }: Props) {
   return (
     <li className="flex items-center gap-sm py-xs">
       {/* 아바타 */}
-      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-surface-tile-2 flex items-center justify-center">
-        <span className="text-body-strong font-semibold text-on-dark">{initial}</span>
+      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-canvas-parchment flex items-center justify-center">
+        <span className="text-body-strong font-semibold text-ink">{initial}</span>
       </div>
 
       {/* 닉네임 */}
-      <span className="flex-1 text-body text-on-dark truncate">{participant.nickname}</span>
+      <span className="flex-1 text-body text-ink truncate">{participant.nickname}</span>
 
       {/* 도착 상태 */}
       <div className="flex items-center gap-xxs flex-shrink-0">
         <span className={`w-2 h-2 rounded-full ${statusDotClass(participant.arrivalStatus)}`} />
-        <span className="text-fine text-body-muted">{participant.arrivalStatus}</span>
+        <span className="text-fine text-ink-muted-48">{participant.arrivalStatus}</span>
       </div>
     </li>
   );

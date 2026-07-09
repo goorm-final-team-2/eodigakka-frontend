@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useParams } from 'react-router';
 
+import BottomSheet, { type SnapPoint } from '@/components/common/BottomSheet';
 import { LocationBottomSheet } from '@/components/location/LocationBottomSheet';
 
 /*
@@ -18,18 +20,14 @@ import { LocationBottomSheet } from '@/components/location/LocationBottomSheet';
 export function LocationSharePage() {
   const { id } = useParams<{ id: string }>();
   const appointmentId = Number(id);
+  const [snap, setSnap] = useState<SnapPoint>('peek');
 
   // TODO: 약속 상세 훅 연동 후 실제 confirmedPlace 데이터로 교체
-  // const { confirmedPlace } = useAppointmentDetail(appointmentId);
   const confirmedPlace = undefined;
 
   return (
     <div className="relative h-dvh overflow-hidden bg-surface-black">
-      {/* ── 지도 슬롯 ──────────────────────────────────────────────────
-          이홍섭 팀원이 여기에 카카오맵 컴포넌트를 넣어주세요.
-          이 div는 absolute inset-0 이므로 지도가 전체 화면을 채웁니다.
-          예: <KakaoMap center={confirmedPlace} participants={participants} />
-      ──────────────────────────────────────────────────────────────── */}
+      {/* 지도 슬롯 */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-sm">
         <svg
           width="48"
@@ -49,8 +47,14 @@ export function LocationSharePage() {
         <p className="text-fine text-ink-muted-48">지도 영역 — 카카오맵 연동 예정</p>
       </div>
 
-      {/* ── 위치 공유 바텀시트 ── */}
-      <LocationBottomSheet appointmentId={appointmentId} confirmedPlace={confirmedPlace} />
+      <BottomSheet snap={snap} onSnapChange={setSnap}>
+        <LocationBottomSheet
+          appointmentId={appointmentId}
+          confirmedPlace={confirmedPlace}
+          snap={snap}
+          onSnapChange={setSnap}
+        />
+      </BottomSheet>
     </div>
   );
 }

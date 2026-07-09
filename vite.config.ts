@@ -26,6 +26,12 @@ export default defineConfig({
         changeOrigin: true,
         ws: true,
       },
+      // Kakao Mobility API 프록시 — 경로 탐색용 (CORS 우회)
+      '/navi': {
+        target: 'https://apis-navi.kakaomobility.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/navi/, ''),
+      },
     },
   },
 });

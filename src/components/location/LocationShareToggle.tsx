@@ -14,8 +14,8 @@ export function LocationShareToggle({ isSharing, isRealtime, isPending, onToggle
   return (
     <div className="flex items-center justify-between gap-md">
       <div className="min-w-0">
-        <p className="text-body-strong font-semibold text-on-dark">위치 공유</p>
-        <p className="text-fine text-body-muted mt-[2px] leading-snug">
+        <p className="text-body-strong font-semibold text-ink">위치 공유</p>
+        <p className="text-fine text-ink-muted-48 mt-[2px] leading-snug">
           {sharingSubtitle(isSharing, isRealtime)}
         </p>
       </div>

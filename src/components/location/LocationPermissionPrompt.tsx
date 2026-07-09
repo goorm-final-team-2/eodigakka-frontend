@@ -6,7 +6,7 @@ export function LocationPermissionPrompt({ onRetry }: Props) {
   return (
     <div className="flex flex-col items-center gap-md px-lg py-xl text-center">
       {/* 아이콘 */}
-      <div className="w-14 h-14 rounded-full bg-surface-tile-2 flex items-center justify-center">
+      <div className="w-14 h-14 rounded-full bg-canvas-parchment flex items-center justify-center">
         <svg
           width="28"
           height="28"
@@ -25,8 +25,8 @@ export function LocationPermissionPrompt({ onRetry }: Props) {
       </div>
 
       <div>
-        <p className="text-body-strong font-semibold text-on-dark">위치 권한이 필요합니다</p>
-        <p className="text-fine text-body-muted mt-xs leading-relaxed">
+        <p className="text-body-strong font-semibold text-ink">위치 권한이 필요합니다</p>
+        <p className="text-fine text-ink-muted-48 mt-xs leading-relaxed">
           위치 공유를 사용하려면 브라우저 위치 권한을 허용해야 합니다.
           <br />
           설정 {'>'} 개인정보 보호 {'>'} 위치 서비스에서 변경해주세요.
