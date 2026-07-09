@@ -9,19 +9,24 @@ import { computeArrivalStatus } from '@/utils/distance';
 
 const POLL_INTERVAL_MS = 5_000;
 
-export function useParticipantLocations(appointmentId: number, confirmedPlace?: ConfirmedPlace) {
+export function useParticipantLocations(
+  appointmentId: number,
+  confirmedPlace?: ConfirmedPlace,
+  isConfirmed = false,
+) {
   // 참여자 기본 정보 (닉네임, 역할 등) — 자주 바뀌지 않으므로 일반 캐싱
   const membersQuery = useQuery({
     queryKey: QUERY_KEYS.members(appointmentId),
     queryFn: () => getMembers(appointmentId),
   });
 
-  // 참여자 위치 — 5초마다 폴링
+  // 참여자 위치 — CONFIRMED 상태일 때만 5초마다 폴링 (PLANNING 상태에서 400 방지)
   const locationsQuery = useQuery({
     queryKey: QUERY_KEYS.locations(appointmentId),
     queryFn: () => getLocations(appointmentId),
     refetchInterval: POLL_INTERVAL_MS,
     staleTime: 0,
+    enabled: isConfirmed,
   });
 
   // 멤버 목록 기준으로 위치 정보를 조인해서 도착 상태 계산

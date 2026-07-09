@@ -20,12 +20,18 @@ export interface LocationPayload {
  * - 연결 실패/끊김 시 5초 후 자동 재연결 (reconnectDelay)
  * - publish 함수: STOMP 연결 중이면 true 반환, 아니면 false (caller가 HTTP fallback)
  */
-export function useStompLocation(appointmentId: number) {
+export function useStompLocation(appointmentId: number, enabled = true) {
   const queryClient = useQueryClient();
   const [isConnected, setIsConnected] = useState(false);
   const publishRef = useRef<((payload: LocationPayload) => boolean) | null>(null);
 
   useEffect(() => {
+    if (!enabled) {
+      // cleanup이 이미 setIsConnected(false) 처리 — 여기서 중복 호출 불필요
+      publishRef.current = null;
+      return;
+    }
+
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const wsUrl =
       (import.meta.env.VITE_WS_URL as string | undefined) ??
@@ -84,7 +90,7 @@ export function useStompLocation(appointmentId: number) {
       void client.deactivate();
       setIsConnected(false);
     };
-  }, [appointmentId, queryClient]);
+  }, [appointmentId, enabled, queryClient]);
 
   // stable reference — publishRef.current는 항상 최신 구현을 가리킴
   const publish = useCallback((payload: LocationPayload) => {
