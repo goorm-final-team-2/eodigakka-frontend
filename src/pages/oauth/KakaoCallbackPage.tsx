@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
+
 import { loginWithKakao } from '@/api/auth';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -15,7 +16,7 @@ export default function KakaoCallbackPage() {
 
     if (code && !isProcessing.current) {
       isProcessing.current = true;
-      
+
       loginWithKakao(code, redirectUri)
         .then((response) => {
           if (response.data) {

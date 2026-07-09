@@ -1,8 +1,8 @@
 import { createBrowserRouter } from 'react-router';
 
 import App from '../App';
-import KakaoCallbackPage from '../pages/oauth/KakaoCallbackPage';
 import LoginPage from '../pages/LoginPage';
+import KakaoCallbackPage from '../pages/oauth/KakaoCallbackPage';
 
 const router = createBrowserRouter([
   {

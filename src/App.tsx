@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router';
 
 import { useAuthStore } from '@/stores/authStore';
@@ -13,8 +12,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-canvas-parchment flex flex-col justify-center items-center px-6">
-      <div className="w-full flex flex-col items-center text-center space-y-6 py-10" style={{ maxWidth: '360px' }}>
-        
+      <div
+        className="w-full flex flex-col items-center text-center space-y-6 py-10"
+        style={{ maxWidth: '360px' }}
+      >
         <div className="w-16 h-16 bg-primary rounded-[18px] flex items-center justify-center shadow-md">
           <span className="text-on-primary font-display font-bold text-xl select-none">어디</span>
         </div>
@@ -26,10 +27,10 @@ export default function App() {
           <div className="w-full bg-white border border-hairline rounded-lg p-5 space-y-5 shadow-sm">
             <div className="space-y-3">
               {user.profileImage ? (
-                <img 
-                  src={user.profileImage} 
-                  alt="프로필" 
-                  className="w-16 h-16 rounded-full mx-auto border-2 border-primary" 
+                <img
+                  src={user.profileImage}
+                  alt="프로필"
+                  className="w-16 h-16 rounded-full mx-auto border-2 border-primary"
                 />
               ) : (
                 <div className="w-16 h-16 rounded-full mx-auto bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xl">
@@ -41,7 +42,7 @@ export default function App() {
               </h2>
               <p className="text-xs text-emerald-600 font-medium">✓ 카카오 로그인 성공 상태</p>
             </div>
-            
+
             <button
               onClick={setLogout}
               className="w-full h-10 bg-slate-100 hover:bg-slate-200 text-ink-muted-80 font-semibold text-xs rounded-pill transition-all"
