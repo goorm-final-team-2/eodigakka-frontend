@@ -1,7 +1,14 @@
-import apiClient from '@/api/index';
-import type { Appointment } from '@/types/appointment';
+import apiClient from './index';
 
-type ApiResponse<T> = { data: T; message: string };
+import type { ApiListResponse, ApiResponse } from '@/types/api';
+import type { Appointment, AppointmentMember } from '@/types/appointment';
 
+// GET /api/appointments — 약속방 목록
 export const getAppointments = () =>
   apiClient.get<ApiResponse<Appointment[]>>('/appointments').then((res) => res.data.data);
+
+// GET /api/appointments/{id}/members — 약속방 참여자 목록
+export const getMembers = (appointmentId: number) =>
+  apiClient
+    .get<ApiListResponse<AppointmentMember>>(`/appointments/${appointmentId}/members`)
+    .then((res) => res.data.data);
