@@ -1,13 +1,17 @@
 import apiClient from './index';
 
-import type { KakaoLoginResponse } from '@/types/user';
+import type { ApiResponse } from '@/types/api';
+import type { KakaoLoginResponse, User } from '@/types/user';
+
+export const getMe = (): Promise<User> =>
+  apiClient.get<ApiResponse<User>>('/users/me').then((res) => res.data.data);
 
 /**
  * 1) 실제 카카오 로그인 API 호출
  */
 export const loginWithKakao = (code: string, redirectUri: string) => {
   return apiClient
-    .post<KakaoLoginResponse>('/api/auth/kakao', {
+    .post<KakaoLoginResponse>('/auth/kakao', {
       code,
       redirectUri,
     })
@@ -20,7 +24,7 @@ export const loginWithKakao = (code: string, redirectUri: string) => {
  */
 export const loginWithDevAccount = (nickname?: string) => {
   return apiClient
-    .post<KakaoLoginResponse>('/api/dev/auth/login', {
+    .post<KakaoLoginResponse>('/dev/auth/login', {
       socialId: 'test_dev_user_999', // 임의의 가짜 아이디 (겹치지 않게 아무거나 설정 가능)
       nickname: nickname || '가짜 테스트 유저',
       profileImage:

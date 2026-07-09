@@ -6,18 +6,6 @@ import { RouterProvider } from 'react-router';
 
 import './index.css';
 import router from './router';
-import './styles/global.css';
-
-const queryClient = new QueryClient();
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 5_000,
-    },
-  },
-});
 
 const queryClient = new QueryClient({
   defaultOptions: {

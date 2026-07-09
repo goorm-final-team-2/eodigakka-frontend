@@ -1,14 +1,8 @@
 import { createBrowserRouter } from 'react-router';
 
 import App from '../App';
-import LoginPage from '../pages/LoginPage';
-import KakaoCallbackPage from '../pages/oauth/KakaoCallbackPage';
 
-import { ROUTES } from '@/constants/routes';
-import { LocationSharePage } from '@/pages/LocationSharePage';
-import LoginPage from '@/pages/LoginPage';
-import KakaoCallbackPage from '@/pages/oauth/KakaoCallbackPage';
-
+import ProtectedRoute from '@/components/common/ProtectedRoute';
 import { ROUTES } from '@/constants/routes';
 import { LocationSharePage } from '@/pages/LocationSharePage';
 import LoginPage from '@/pages/LoginPage';
@@ -16,10 +10,6 @@ import KakaoCallbackPage from '@/pages/oauth/KakaoCallbackPage';
 import RoomVotePage from '@/pages/room/RoomVotePage';
 
 const router = createBrowserRouter([
-  {
-    path: ROUTES.HOME,
-    element: <App />,
-  },
   {
     path: ROUTES.LOGIN,
     element: <LoginPage />,
@@ -29,12 +19,21 @@ const router = createBrowserRouter([
     element: <KakaoCallbackPage />,
   },
   {
-    path: ROUTES.ROOM,
-    element: <RoomVotePage />,
-  },
-  {
-    path: ROUTES.LOCATION_SHARE,
-    element: <LocationSharePage />,
+    element: <ProtectedRoute />,
+    children: [
+      {
+        path: ROUTES.HOME,
+        element: <App />,
+      },
+      {
+        path: ROUTES.ROOM,
+        element: <RoomVotePage />,
+      },
+      {
+        path: ROUTES.LOCATION_SHARE,
+        element: <LocationSharePage />,
+      },
+    ],
   },
 ]);
 
