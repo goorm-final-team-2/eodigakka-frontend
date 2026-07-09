@@ -44,6 +44,9 @@
   --color-divider: #f0f0f0; /* 소프트 보더 (버튼 링 등) */
   --color-hairline: #e0e0e0; /* 카드, 칩 1px 테두리 */
 
+  /* Status (참여자 도착 상태) */
+  --color-status-arrived: #34c759; /* 도착 근처 — Apple system green */
+
   /* ==========================================================
    * Typography — Font Families
    * → font-display / font-text

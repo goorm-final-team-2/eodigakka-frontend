@@ -1,54 +1,29 @@
 import { create } from 'zustand';
 
-type AuthStore = {
+import type { User } from '@/types/user';
+
+interface AuthState {
   accessToken: string | null;
-  userId: number | null;
-  role: 'HOST' | 'MEMBER' | null;
-  nickname: string | null;
-  profileImage: string | null;
-  guestToken: string | null;
-  setAuth: (params: {
-    accessToken: string;
-    userId: number;
-    role: 'HOST' | 'MEMBER';
-    nickname: string;
-    profileImage?: string;
-  }) => void;
-  setGuestToken: (token: string) => void;
-  setRole: (role: 'HOST' | 'MEMBER') => void;
-  clear: () => void;
-};
+  user: User | null;
+  isAuthenticated: boolean;
+  setLogin: (accessToken: string, user: User) => void;
+  setLogout: () => void;
+}
 
-export const useAuthStore = create<AuthStore>((set) => ({
-  accessToken: localStorage.getItem('accessToken'),
-  userId: null,
-  role: null,
-  nickname: null,
-  profileImage: null,
-  guestToken: null,
-
-  setAuth: ({ accessToken, userId, role, nickname, profileImage }) => {
-    localStorage.setItem('accessToken', accessToken);
-    set({ accessToken, userId, role, nickname, profileImage: profileImage ?? null });
-  },
-
-  setGuestToken: (token) => {
-    sessionStorage.setItem('guestToken', token);
-    set({ guestToken: token });
-  },
-
-  setRole: (role) => set({ role }),
-
-  clear: () => {
-    localStorage.removeItem('accessToken');
-    sessionStorage.removeItem('guestToken');
+export const useAuthStore = create<AuthState>((set) => ({
+  accessToken: null,
+  user: null,
+  isAuthenticated: false,
+  setLogin: (accessToken, user) =>
+    set({
+      accessToken,
+      user,
+      isAuthenticated: true,
+    }),
+  setLogout: () =>
     set({
       accessToken: null,
-      userId: null,
-      role: null,
-      nickname: null,
-      profileImage: null,
-      guestToken: null,
-    });
-  },
+      user: null,
+      isAuthenticated: false,
+    }),
 }));

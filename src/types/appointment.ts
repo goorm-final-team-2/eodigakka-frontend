@@ -12,6 +12,8 @@ export type Appointment = {
   inviteCode: string;
   status: AppointmentStatus;
   role: AppointmentMemberRole;
+  preferredArea: string;
+  description?: string;
 };
 
 export interface AppointmentMember {
