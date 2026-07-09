@@ -1,7 +1,14 @@
 import apiClient from './index';
 
 import type { ApiListResponse, ApiResponse } from '@/types/api';
-import type { Appointment, AppointmentMember } from '@/types/appointment';
+import type {
+  Appointment,
+  AppointmentCreateRequest,
+  AppointmentJoinRequest,
+  AppointmentMember,
+  GuestJoinRequest,
+  GuestJoinResponse,
+} from '@/types/appointment';
 
 // GET /api/appointments — 약속방 목록
 export const getAppointments = () =>
@@ -17,4 +24,18 @@ export const getAppointment = (appointmentId: number): Promise<Appointment> =>
 export const getMembers = (appointmentId: number) =>
   apiClient
     .get<ApiListResponse<AppointmentMember>>(`/appointments/${appointmentId}/members`)
+    .then((res) => res.data.data);
+
+// POST /api/appointments — 약속방 생성
+export const createAppointment = (body: AppointmentCreateRequest): Promise<Appointment> =>
+  apiClient.post<ApiResponse<Appointment>>('/appointments', body).then((res) => res.data.data);
+
+// POST /api/appointments/join — 약속방 참여 (로그인 유저)
+export const joinAppointment = (body: AppointmentJoinRequest): Promise<Appointment> =>
+  apiClient.post<ApiResponse<Appointment>>('/appointments/join', body).then((res) => res.data.data);
+
+// POST /api/appointments/guests — 약속방 참여 (게스트)
+export const joinAppointmentAsGuest = (body: GuestJoinRequest): Promise<GuestJoinResponse> =>
+  apiClient
+    .post<ApiResponse<GuestJoinResponse>>('/appointments/guests', body)
     .then((res) => res.data.data);
