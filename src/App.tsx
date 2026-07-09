@@ -1,110 +1,67 @@
-import { useEffect, useState } from 'react';
-
-// 방 데이터의 타입을 정의해줍니다 (성우님 API 스펙 기준)
-interface Room {
-  id: number;
-  title: string;
-  appointmentDate: string;
-  preferredArea: string;
-  description?: string;
-}
+import { useAppointments } from '@/hooks/useAppointments';
 
 export default function App() {
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: rooms = [], isLoading, isError } = useAppointments();
 
-  useEffect(() => {
-    // 백엔드 개발 서버 URL로 요청을 보냅니다.
-    // 쿠키 인증을 위해 credentials: "include" 설정을 유지합니다.
-    fetch('https://api.eodigakka.xyz/api/appointments', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('방 목록을 불러오는데 실패했어요.');
-        }
-        return res.json();
-      })
-      .then((response) => {
-        // 성우님 공통 응답 포맷인 { data: [...] } 구조에 맞춰 데이터를 넣어줍니다.
-        if (response.data) {
-          setRooms(response.data);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 text-gray-500">
+      <div className="flex min-h-screen items-center justify-center bg-canvas-parchment text-ink-muted-48">
         로딩 중...
       </div>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 text-red-500">
-        {error}
+      <div className="flex min-h-screen items-center justify-center bg-canvas-parchment text-ink-muted-48">
+        방 목록을 불러오는데 실패했어요.
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-safe pb-safe px-4">
-      {/* 상단 헤더 영역 */}
-      <div className="flex items-center justify-between py-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-orange-500">어디가까</h1>
-        <button className="bg-orange-500 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-sm hover:bg-orange-600 transition">
+    <div className="min-h-screen bg-canvas-parchment pt-safe pb-safe px-4">
+      {/* 상단 헤더 */}
+      <div className="flex items-center justify-between py-4 border-b border-hairline">
+        <h1 className="font-display text-2xl font-bold text-primary">어디가까</h1>
+        <button className="bg-primary text-on-primary px-3 py-1.5 rounded-pill text-sm font-medium shadow-sm transition-all active:scale-95">
           + 새 약속
         </button>
       </div>
 
-      {/* 타이틀 및 개수 표시 */}
+      {/* 약속 개수 */}
       <div className="mt-6 mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">
+        <h2 className="text-lg font-semibold text-ink">
           약속방 목록{' '}
-          <span className="text-sm font-normal text-gray-500">
+          <span className="text-sm font-normal text-ink-muted-48">
             (참여 중인 약속이 총 {rooms.length}개 있습니다.)
           </span>
         </h2>
       </div>
 
-      {/* 약속방 목록 카드 리스트 */}
+      {/* 약속방 카드 목록 */}
       <div className="space-y-4">
         {rooms.length === 0 ? (
-          <p className="text-center text-gray-400 py-10 text-sm">
+          <p className="text-center text-ink-muted-48 py-10 text-sm">
             아직 참여 중인 약속방이 없습니다.
           </p>
         ) : (
           rooms.map((room) => (
             <div
               key={room.id}
-              className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition cursor-pointer"
+              className="bg-canvas p-5 rounded-lg shadow-sm border border-hairline transition-all active:scale-95 cursor-pointer"
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-base font-bold text-gray-900 mb-1">{room.title}</h3>
-                  <p className="text-xs text-gray-500 mb-3">
-                    {room.description || '방 설명이 없습니다.'}
-                  </p>
-                  <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-                    <span className="bg-gray-100 px-2 py-1 rounded-md">
-                      📅 {room.appointmentDate}
-                    </span>
-                    <span className="bg-orange-50 px-2 py-1 rounded-md text-orange-600 font-medium">
-                      📍 {room.preferredArea}
-                    </span>
-                  </div>
-                </div>
+              <h3 className="text-base font-bold text-ink mb-1">{room.title}</h3>
+              <p className="text-xs text-ink-muted-48 mb-3">
+                {room.description ?? '방 설명이 없습니다.'}
+              </p>
+              <div className="flex flex-wrap gap-2 text-xs text-ink-muted-80">
+                <span className="bg-canvas-parchment px-2 py-1 rounded-sm">
+                  📅 {room.appointmentDate}
+                </span>
+                <span className="bg-canvas-parchment px-2 py-1 rounded-sm text-primary font-medium">
+                  📍 {room.preferredArea}
+                </span>
               </div>
             </div>
           ))
