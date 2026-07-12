@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 import AppointmentFormModal from '@/components/appointment/AppointmentFormModal';
 import { ROUTES } from '@/constants/routes';
 import { useAppointments, useDeleteAppointment } from '@/hooks/useAppointments';
+import type { Appointment } from '@/types/appointment';
 
 const statusLabel = {
   PLANNING: '장소 추천 중',
@@ -18,6 +19,14 @@ const roleLabel = {
 
 function formatAppointmentTime(time: string) {
   return time.length >= 5 ? time.slice(0, 5) : time;
+}
+
+function getDeleteConfirmMessage(room: Appointment) {
+  if (room.status === 'CLOSED') {
+    return '종료된 약속방을 삭제할까요? 참여자에게도 더 이상 보이지 않습니다.';
+  }
+
+  return '약속방을 삭제할까요? 참여자에게도 더 이상 보이지 않습니다.';
 }
 
 export default function App() {
@@ -72,83 +81,98 @@ export default function App() {
             아직 참여 중인 약속방이 없습니다.
           </p>
         ) : (
-          rooms.map((room) => (
-            <div
-              key={room.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => navigate(ROUTES.ROOM.replace(':appointmentId', String(room.id)))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ')
-                  navigate(ROUTES.ROOM.replace(':appointmentId', String(room.id)));
-              }}
-              className="bg-canvas p-5 rounded-lg shadow-sm border border-hairline transition-all active:scale-95 cursor-pointer"
-            >
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h3 className="text-base font-bold text-ink truncate">{room.title}</h3>
-                  <p className="mt-1 text-xs text-ink-muted-48 line-clamp-2">
-                    {room.description ?? '약속 설명이 없습니다.'}
-                  </p>
-                </div>
-                <span className="flex-none whitespace-nowrap rounded-pill bg-canvas-parchment px-3 py-1.5 text-xs font-semibold text-primary">
-                  {statusLabel[room.status]}
-                </span>
-              </div>
+          rooms.map((room) => {
+            const canDeleteRoom =
+              room.role === 'HOST' && (room.status === 'PLANNING' || room.status === 'CLOSED');
+            const shouldShowCloseBeforeDeleteNotice =
+              room.role === 'HOST' && room.status === 'CONFIRMED';
+            const shouldShowClosedNotice = room.role === 'HOST' && room.status === 'CLOSED';
 
-              <div className="grid gap-2 text-xs text-ink-muted-80">
-                <div className="flex items-center gap-2 rounded-sm bg-canvas-parchment px-3 py-2">
-                  <span>📅</span>
-                  <span className="font-medium text-ink">
-                    {room.appointmentDate} {formatAppointmentTime(room.appointmentTime)}
+            return (
+              <div
+                key={room.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(ROUTES.ROOM.replace(':appointmentId', String(room.id)))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ')
+                    navigate(ROUTES.ROOM.replace(':appointmentId', String(room.id)));
+                }}
+                className="bg-canvas p-5 rounded-lg shadow-sm border border-hairline transition-all active:scale-95 cursor-pointer"
+              >
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="text-base font-bold text-ink truncate">{room.title}</h3>
+                    <p className="mt-1 text-xs text-ink-muted-48 line-clamp-2">
+                      {room.description ?? '약속 설명이 없습니다.'}
+                    </p>
+                  </div>
+                  <span className="flex-none whitespace-nowrap rounded-pill bg-canvas-parchment px-3 py-1.5 text-xs font-semibold text-primary">
+                    {statusLabel[room.status]}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 rounded-sm bg-canvas-parchment px-3 py-2">
-                  <span>📍</span>
-                  <span className="font-medium text-primary">
-                    {room.preferredArea ?? '선호 지역 미정'}
-                  </span>
+
+                <div className="grid gap-2 text-xs text-ink-muted-80">
+                  <div className="flex items-center gap-2 rounded-sm bg-canvas-parchment px-3 py-2">
+                    <span>📅</span>
+                    <span className="font-medium text-ink">
+                      {room.appointmentDate} {formatAppointmentTime(room.appointmentTime)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-sm bg-canvas-parchment px-3 py-2">
+                    <span>📍</span>
+                    <span className="font-medium text-primary">
+                      {room.preferredArea ?? '선호 지역 미정'}
+                    </span>
+                  </div>
+                  {room.notice && (
+                    <div className="flex items-start gap-2 rounded-sm bg-canvas-parchment px-3 py-2">
+                      <span className="font-semibold text-ink-muted-48">공지</span>
+                      <span className="line-clamp-2">{room.notice}</span>
+                    </div>
+                  )}
                 </div>
-                {room.notice && (
-                  <div className="flex items-start gap-2 rounded-sm bg-canvas-parchment px-3 py-2">
-                    <span className="font-semibold text-ink-muted-48">공지</span>
-                    <span className="line-clamp-2">{room.notice}</span>
+
+                <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+                  <span className="rounded-pill border border-hairline px-2 py-1 text-ink-muted-48">
+                    {roleLabel[room.role]}
+                  </span>
+                  <span className="font-semibold text-primary">약속방 보기 →</span>
+                </div>
+
+                {(shouldShowCloseBeforeDeleteNotice || shouldShowClosedNotice || canDeleteRoom) && (
+                  <div className="mt-3 flex items-center justify-between gap-3 border-t border-hairline pt-3 text-xs">
+                    <p className="min-w-0 text-ink-muted-48">
+                      {shouldShowCloseBeforeDeleteNotice && '삭제하려면 먼저 약속을 종료하세요.'}
+                      {shouldShowClosedNotice &&
+                        '종료된 약속입니다. 필요하면 방장이 삭제할 수 있습니다.'}
+                    </p>
+                    {canDeleteRoom && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm(getDeleteConfirmMessage(room))) {
+                            deleteRoom(room.id, {
+                              onError: (err) => {
+                                const msg =
+                                  (err as { response?: { data?: { message?: string } } })?.response
+                                    ?.data?.message ?? '약속방 삭제에 실패했습니다.';
+                                alert(msg);
+                              },
+                            });
+                          }
+                        }}
+                        disabled={isDeleting}
+                        className="flex-none text-xs text-ink-muted-48 hover:text-primary transition-colors disabled:opacity-40"
+                      >
+                        삭제
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
-
-              <div className="mt-3 flex items-center justify-between gap-2 text-xs">
-                <span className="rounded-pill border border-hairline px-2 py-1 text-ink-muted-48">
-                  {roleLabel[room.role]}
-                </span>
-                <span className="font-semibold text-primary">약속방 보기 →</span>
-              </div>
-
-              {room.role === 'HOST' && (
-                <div className="mt-3 flex justify-end">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm(`"${room.title}" 약속방을 삭제하시겠습니까?`)) {
-                        deleteRoom(room.id, {
-                          onError: (err) => {
-                            const msg =
-                              (err as { response?: { data?: { message?: string } } })?.response
-                                ?.data?.message ?? '약속방 삭제에 실패했습니다.';
-                            alert(msg);
-                          },
-                        });
-                      }
-                    }}
-                    disabled={isDeleting}
-                    className="text-xs text-ink-muted-48 hover:text-red-500 transition-colors disabled:opacity-40"
-                  >
-                    삭제
-                  </button>
-                </div>
-              )}
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
