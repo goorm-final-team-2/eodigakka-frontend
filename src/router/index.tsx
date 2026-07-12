@@ -4,6 +4,7 @@ import App from '../App';
 
 import ProtectedRoute from '@/components/common/ProtectedRoute';
 import { ROUTES } from '@/constants/routes';
+import InvitePage from '@/pages/InvitePage';
 import { LocationSharePage } from '@/pages/LocationSharePage';
 import LoginPage from '@/pages/LoginPage';
 import KakaoCallbackPage from '@/pages/oauth/KakaoCallbackPage';
@@ -19,19 +20,23 @@ const router = createBrowserRouter([
     element: <KakaoCallbackPage />,
   },
   {
+    path: ROUTES.INVITE,
+    element: <InvitePage />,
+  },
+  {
+    path: ROUTES.ROOM,
+    element: <RoomVotePage />,
+  },
+  {
+    path: ROUTES.LOCATION_SHARE,
+    element: <LocationSharePage />,
+  },
+  {
     element: <ProtectedRoute />,
     children: [
       {
         path: ROUTES.HOME,
         element: <App />,
-      },
-      {
-        path: ROUTES.ROOM,
-        element: <RoomVotePage />,
-      },
-      {
-        path: ROUTES.LOCATION_SHARE,
-        element: <LocationSharePage />,
       },
     ],
   },

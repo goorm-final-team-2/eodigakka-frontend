@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 
+import { joinAppointment } from '@/api/appointment';
 import { loginWithKakao } from '@/api/auth';
+import { ROUTES } from '@/constants/routes';
 import { useAuthStore } from '@/stores/authStore';
 
 export default function KakaoCallbackPage() {
@@ -26,6 +28,21 @@ export default function KakaoCallbackPage() {
           sessionStorage.removeItem('kakao_processed_code');
           // Zustand 전역 상태에 토큰과 유저 정보 저장
           setLogin(accessToken, user);
+          const pendingInviteCode = sessionStorage.getItem('pending_invite_code');
+          if (pendingInviteCode) {
+            joinAppointment({ inviteCode: pendingInviteCode })
+              .then((appointment) => {
+                sessionStorage.removeItem('pending_invite_code');
+                navigate(ROUTES.ROOM.replace(':appointmentId', String(appointment.id)));
+              })
+              .catch((error) => {
+                sessionStorage.removeItem('pending_invite_code');
+                // eslint-disable-next-line no-console
+                console.error('초대 코드 약속방 참여 실패:', error);
+                navigate('/');
+              });
+            return;
+          }
           // 메인 페이지(약속방 목록 등)로 이동
           navigate('/');
         })
