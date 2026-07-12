@@ -1,13 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { LocationPermissionPrompt } from './LocationPermissionPrompt';
 import { LocationShareToggle } from './LocationShareToggle';
 import { ParticipantStatusList } from './ParticipantStatusList';
 
 import type { SnapPoint } from '@/components/common/BottomSheet';
-import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { useCandidates } from '@/hooks/useCandidates';
-import { useCloseAppointment } from '@/hooks/useCloseAppointment';
 import { useConfirmedPlace } from '@/hooks/useConfirmedPlace';
 import { useLocationMarkers } from '@/hooks/useLocationMarkers';
 import { useLocationShare } from '@/hooks/useLocationShare';
@@ -36,10 +34,6 @@ export function LocationBottomSheet({
   appointment,
 }: Props) {
   const user = useAuthStore((s) => s.user);
-  const [isCloseDialogOpen, setIsCloseDialogOpen] = useState(false);
-  const { mutate: closeAppointmentMutate, isPending: isClosingAppointment } =
-    useCloseAppointment(appointmentId);
-
   // 확정 장소 API 응답 + 후보 목록 → 좌표 포함 확정 장소 계산
   const { data: confirmedPlaceAPI } = useConfirmedPlace(appointmentId);
   const { data: candidates } = useCandidates(appointmentId);
@@ -79,7 +73,6 @@ export function LocationBottomSheet({
 
   const showPermissionPrompt = permissionStatus === 'denied' || permissionStatus === 'unavailable';
   const isClosed = appointment?.status === 'CLOSED';
-  const canCloseAppointment = appointment?.role === 'HOST' && appointment?.status === 'CONFIRMED';
 
   const handleToggle = () => {
     if (isClosed) return;
@@ -98,23 +91,8 @@ export function LocationBottomSheet({
     );
   };
 
-  const handleCloseAppointment = () => {
-    closeAppointmentMutate(undefined, {
-      onSuccess: () => setIsCloseDialogOpen(false),
-    });
-  };
-
   return (
     <>
-      <ConfirmDialog
-        isOpen={isCloseDialogOpen}
-        title="약속을 종료할까요?"
-        description="종료 후에는 위치 공유와 약속 진행 기능을 사용할 수 없습니다."
-        confirmLabel={isClosingAppointment ? '종료 중...' : '약속 종료'}
-        cancelLabel="취소"
-        onConfirm={handleCloseAppointment}
-        onCancel={() => setIsCloseDialogOpen(false)}
-      />
       <div
         style={{
           display: 'flex',
@@ -189,25 +167,6 @@ export function LocationBottomSheet({
                   ? `${Math.round(routeInfo.duration / 60)}분 · ${(routeInfo.distance / 1000).toFixed(1)}km | 지도에서 보기 →`
                   : `${confirmedPlaceCoords.name ?? '목적지'} 지도에서 보기 →`}
             </button>
-          </div>
-        )}
-
-        {canCloseAppointment && (
-          <div className="flex-none px-4 py-3 border-t border-hairline">
-            <div className="rounded-lg border border-hairline bg-canvas p-4">
-              <p className="text-sm font-semibold text-ink">약속 종료</p>
-              <p className="mt-1 text-xs text-ink-muted-48">
-                종료 후에는 위치 공유와 약속 진행 기능을 사용할 수 없습니다.
-              </p>
-              <button
-                type="button"
-                onClick={() => setIsCloseDialogOpen(true)}
-                disabled={isClosingAppointment}
-                className="mt-3 w-full rounded-pill bg-primary py-3 text-sm font-semibold text-on-primary active:scale-95 transition-transform disabled:opacity-50"
-              >
-                {isClosingAppointment ? '종료 중...' : '약속 종료하기'}
-              </button>
-            </div>
           </div>
         )}
       </div>
