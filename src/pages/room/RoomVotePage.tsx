@@ -37,25 +37,20 @@ const RoomVotePage = () => {
   const { mutate: leaveAppointment, isPending: isLeavingAppointment } = useLeaveAppointment(
     Number(appointmentId),
   );
+  const hasAccessToken = Boolean(localStorage.getItem('accessToken'));
   const canCloseAppointment = appointment?.role === 'HOST' && appointment?.status === 'CONFIRMED';
   const canLeaveAppointment = appointment?.role === 'MEMBER';
   const canManageAppointment = canCloseAppointment || canLeaveAppointment;
 
   useEffect(() => {
-    const hasAccessToken = Boolean(localStorage.getItem('accessToken'));
     if (hasAccessToken || !appointmentId || !appointment?.inviteCode) return;
 
     saveGuestAppointmentContext(Number(appointmentId), appointment.inviteCode);
-  }, [appointment?.inviteCode, appointmentId]);
+  }, [appointment?.inviteCode, appointmentId, hasAccessToken]);
 
   if (!appointmentId) return null;
 
   const handleBack = () => {
-    const hasAccessToken = Boolean(localStorage.getItem('accessToken'));
-    if (!hasAccessToken && appointment?.inviteCode) {
-      navigate(ROUTES.INVITE.replace(':inviteCode', appointment.inviteCode), { replace: true });
-      return;
-    }
     navigate(ROUTES.HOME);
   };
 
@@ -89,7 +84,6 @@ const RoomVotePage = () => {
         setIsLeaveDialogOpen(false);
         setIsManageMenuOpen(false);
         const inviteCode = appointment?.inviteCode;
-        const hasAccessToken = Boolean(localStorage.getItem('accessToken'));
         if (!hasAccessToken && inviteCode) {
           clearGuestAppointmentContext();
           navigate(ROUTES.INVITE.replace(':inviteCode', inviteCode));
@@ -127,20 +121,24 @@ const RoomVotePage = () => {
       {/* 상단 헤더: 뒤로가기 | 탭 | 초대 공유/약속 관리 */}
       <div className="fixed top-0 inset-x-0 z-20 flex items-start justify-between pt-safe px-4 pointer-events-none">
         {/* 좌상단 — 메인으로 */}
-        <button onClick={handleBack} className={`${btnClass} mt-3`} aria-label="이전 화면으로">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </button>
+        <div className="mt-3 w-9">
+          {hasAccessToken && (
+            <button onClick={handleBack} className={btnClass} aria-label="이전 화면으로">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+          )}
+        </div>
 
         {/* 중앙 — 탭 전환 */}
         <div className="flex mt-3 bg-surface-tile-1/80 backdrop-blur-md rounded-pill p-1 pointer-events-auto shadow-lg">
