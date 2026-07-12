@@ -27,7 +27,7 @@ const RoomVotePage = () => {
   const handleShare = () => {
     const inviteCode = appointment?.inviteCode;
     if (!inviteCode) return;
-    const url = `${window.location.origin}/?invite=${inviteCode}`;
+    const url = `${window.location.origin}${ROUTES.INVITE.replace(':inviteCode', inviteCode)}`;
     if (navigator.share) {
       void navigator.share({ title: appointment.title, url });
     } else {

@@ -4,6 +4,7 @@ import type { ApiListResponse, ApiResponse } from '@/types/api';
 import type {
   Appointment,
   AppointmentCreateRequest,
+  AppointmentInviteResponse,
   AppointmentJoinRequest,
   AppointmentMember,
   GuestJoinRequest,
@@ -18,6 +19,12 @@ export const getAppointments = () =>
 export const getAppointment = (appointmentId: number): Promise<Appointment> =>
   apiClient
     .get<ApiResponse<Appointment>>(`/appointments/${appointmentId}`)
+    .then((res) => res.data.data);
+
+// GET /api/appointments/invite/{inviteCode} — 초대 코드로 약속방 정보 조회
+export const getAppointmentInvite = (inviteCode: string): Promise<AppointmentInviteResponse> =>
+  apiClient
+    .get<ApiResponse<AppointmentInviteResponse>>(`/appointments/invite/${inviteCode}`)
     .then((res) => res.data.data);
 
 // GET /api/appointments/{id}/members — 약속방 참여자 목록

@@ -38,6 +38,18 @@ export interface AppointmentJoinRequest {
   inviteCode: string;
 }
 
+export interface AppointmentInviteResponse {
+  appointmentId: number;
+  title: string;
+  appointmentDate: string;
+  appointmentTime: string;
+  description: string | null;
+  preferredArea: string | null;
+  notice: string | null;
+  inviteCode: string;
+  status: AppointmentStatus;
+}
+
 // 약속방 참여 요청 (게스트)
 export interface GuestJoinRequest {
   inviteCode: string;
