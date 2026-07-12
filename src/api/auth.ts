@@ -11,11 +11,11 @@ export const getMe = (): Promise<User> =>
  */
 export const loginWithKakao = (code: string, redirectUri: string) => {
   return apiClient
-    .post<KakaoLoginResponse>('/auth/kakao', {
+    .post<ApiResponse<KakaoLoginResponse>>('/auth/kakao', {
       code,
       redirectUri,
     })
-    .then((res) => res.data);
+    .then((res) => res.data.data);
 };
 
 /**
@@ -24,11 +24,11 @@ export const loginWithKakao = (code: string, redirectUri: string) => {
  */
 export const loginWithDevAccount = (nickname?: string) => {
   return apiClient
-    .post<KakaoLoginResponse>('/dev/auth/login', {
+    .post<ApiResponse<KakaoLoginResponse>>('/dev/auth/login', {
       socialId: 'test_dev_user_999', // 임의의 가짜 아이디 (겹치지 않게 아무거나 설정 가능)
       nickname: nickname || '가짜 테스트 유저',
       profileImage:
         'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80',
     })
-    .then((res) => res.data);
+    .then((res) => res.data.data);
 };
