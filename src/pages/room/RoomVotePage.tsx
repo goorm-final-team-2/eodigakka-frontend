@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
 import BottomSheet, { type SnapPoint } from '@/components/common/BottomSheet';
@@ -36,6 +36,24 @@ const RoomVotePage = () => {
   const canCloseAppointment = appointment?.role === 'HOST' && appointment?.status === 'CONFIRMED';
   const canLeaveAppointment = appointment?.role === 'MEMBER';
   const canManageAppointment = canCloseAppointment || canLeaveAppointment;
+
+  useEffect(() => {
+    const hasAccessToken = Boolean(localStorage.getItem('accessToken'));
+    if (hasAccessToken || !appointmentId || !appointment?.inviteCode) return;
+
+    const roomPath = ROUTES.ROOM.replace(':appointmentId', appointmentId);
+    window.history.pushState({ guestRoomBackGuard: true }, '', roomPath);
+
+    const handlePopState = () => {
+      navigate(roomPath, { replace: true });
+      window.history.pushState({ guestRoomBackGuard: true }, '', roomPath);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [appointment?.inviteCode, appointmentId, navigate]);
 
   if (!appointmentId) return null;
 
