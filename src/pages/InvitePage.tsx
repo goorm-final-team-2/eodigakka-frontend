@@ -1,8 +1,13 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
-import { getAppointmentInvite, joinAppointment, joinAppointmentAsGuest } from '@/api/appointment';
+import {
+  getAppointment,
+  getAppointmentInvite,
+  joinAppointment,
+  joinAppointmentAsGuest,
+} from '@/api/appointment';
 import { ROUTES } from '@/constants/routes';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -29,7 +34,7 @@ export default function InvitePage() {
   const joinAsMemberMutation = useMutation({
     mutationFn: () => joinAppointment({ inviteCode }),
     onSuccess: (appointment) => {
-      navigate(ROUTES.ROOM.replace(':appointmentId', String(appointment.id)));
+      navigate(ROUTES.ROOM.replace(':appointmentId', String(appointment.id)), { replace: true });
     },
     onError: () => {
       setErrorMessage('약속방 참여에 실패했습니다. 잠시 후 다시 시도해주세요.');
@@ -39,7 +44,9 @@ export default function InvitePage() {
   const joinAsGuestMutation = useMutation({
     mutationFn: () => joinAppointmentAsGuest({ inviteCode, guestName: guestName.trim() }),
     onSuccess: (response) => {
-      navigate(ROUTES.ROOM.replace(':appointmentId', String(response.appointment.id)));
+      navigate(ROUTES.ROOM.replace(':appointmentId', String(response.appointment.id)), {
+        replace: true,
+      });
     },
     onError: () => {
       setErrorMessage('게스트 참여에 실패했습니다. 이름과 초대 링크를 다시 확인해주세요.');
@@ -70,6 +77,24 @@ export default function InvitePage() {
 
     joinAsGuestMutation.mutate();
   };
+
+  useEffect(() => {
+    if (!invite || isAuthenticated) return;
+
+    let isActive = true;
+    getAppointment(invite.appointmentId)
+      .then((appointment) => {
+        if (!isActive) return;
+        navigate(ROUTES.ROOM.replace(':appointmentId', String(appointment.id)), { replace: true });
+      })
+      .catch(() => {
+        // 유효한 guestSession이 없으면 기존 초대 선택 화면을 유지합니다.
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [invite, isAuthenticated, navigate]);
 
   if (isLoading) {
     return (
