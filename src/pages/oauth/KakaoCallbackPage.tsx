@@ -22,14 +22,12 @@ export default function KakaoCallbackPage() {
 
       loginWithKakao(code, redirectUri)
         .then((response) => {
-          if (response.data) {
-            const { accessToken, user } = response.data;
-            sessionStorage.removeItem('kakao_processed_code');
-            // Zustand 전역 상태에 토큰과 유저 정보 저장
-            setLogin(accessToken, user);
-            // 메인 페이지(약속방 목록 등)로 이동
-            navigate('/');
-          }
+          const { accessToken, user } = response;
+          sessionStorage.removeItem('kakao_processed_code');
+          // Zustand 전역 상태에 토큰과 유저 정보 저장
+          setLogin(accessToken, user);
+          // 메인 페이지(약속방 목록 등)로 이동
+          navigate('/');
         })
         .catch((error) => {
           sessionStorage.removeItem('kakao_processed_code');
