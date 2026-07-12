@@ -42,6 +42,8 @@ const PlaceCandidateSheet = ({
 
   const isHost = appointment?.role === 'HOST';
   const isConfirmed = appointment?.status === 'CONFIRMED';
+  const isClosed = appointment?.status === 'CLOSED';
+  const isInteractionLocked = appointment?.status !== 'PLANNING';
 
   const miniMapRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -266,15 +268,21 @@ const PlaceCandidateSheet = ({
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !isConfirmed && handleSearch()}
-              placeholder={isConfirmed ? '장소가 확정되었습니다' : '장소를 검색하세요'}
-              disabled={isConfirmed}
+              onKeyDown={(e) => e.key === 'Enter' && !isInteractionLocked && handleSearch()}
+              placeholder={
+                isClosed
+                  ? '종료된 약속입니다'
+                  : isConfirmed
+                    ? '장소가 확정되었습니다'
+                    : '장소를 검색하세요'
+              }
+              disabled={isInteractionLocked}
               className="flex-1 px-4 py-2 rounded-pill border border-hairline bg-canvas-parchment text-ink text-sm outline-none focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <button
               type="button"
               onClick={handleSearch}
-              disabled={isSearching || isConfirmed}
+              disabled={isSearching || isInteractionLocked}
               className="px-4 py-2 rounded-pill bg-primary text-sm font-semibold text-on-primary disabled:opacity-50"
             >
               {isSearching ? '검색 중' : '검색'}
@@ -366,7 +374,7 @@ const PlaceCandidateSheet = ({
                       type="button"
                       className="w-full py-3 rounded-pill bg-primary text-sm font-semibold text-on-primary disabled:opacity-50"
                       onClick={handleRecommend}
-                      disabled={isAdding || isConfirmed}
+                      disabled={isAdding || isInteractionLocked}
                     >
                       {isAdding ? '추천 중...' : '이 장소 추천하기'}
                     </button>
@@ -404,7 +412,7 @@ const PlaceCandidateSheet = ({
                       type="button"
                       className="px-3 py-2 rounded-pill bg-primary text-xs font-semibold text-on-primary whitespace-nowrap disabled:opacity-50"
                       onClick={handleRecommend}
-                      disabled={isAdding || isConfirmed}
+                      disabled={isAdding || isInteractionLocked}
                     >
                       {isAdding ? '추천 중...' : '추천하기'}
                     </button>
@@ -434,6 +442,9 @@ const PlaceCandidateSheet = ({
                   {isConfirmed && (
                     <span className="text-xs font-semibold text-primary">확정됨</span>
                   )}
+                  {isClosed && (
+                    <span className="text-xs font-semibold text-ink-muted-48">종료됨</span>
+                  )}
                 </div>
               </div>
               <CandidateList
@@ -442,7 +453,7 @@ const PlaceCandidateSheet = ({
                 voteResults={voteResults ?? []}
                 appointmentId={appointmentId}
                 isHost={isHost ?? false}
-                isConfirmed={isConfirmed ?? false}
+                isConfirmed={isInteractionLocked}
                 topVotedCandidateId={topVotedCandidateId}
                 confirmedCandidateId={confirmedCandidateId}
                 onConfirm={handleConfirm}
