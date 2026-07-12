@@ -50,3 +50,9 @@ export const joinAppointmentAsGuest = (body: GuestJoinRequest): Promise<GuestJoi
 // DELETE /api/appointments/{id} — 약속방 삭제 (방장 전용)
 export const deleteAppointment = (appointmentId: number): Promise<void> =>
   apiClient.delete(`/appointments/${appointmentId}`).then(() => undefined);
+
+// PATCH /api/appointments/{id}/close — 약속 종료 (방장 전용)
+export const closeAppointment = (appointmentId: number): Promise<Appointment> =>
+  apiClient
+    .patch<ApiResponse<Appointment>>(`/appointments/${appointmentId}/close`)
+    .then((res) => res.data.data);

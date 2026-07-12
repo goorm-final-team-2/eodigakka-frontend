@@ -135,6 +135,7 @@ const RoomVotePage = () => {
             snap={snap}
             onSnapChange={setSnap}
             isConfirmed={appointment?.status === 'CONFIRMED'}
+            appointment={appointment}
           />
         )}
       </BottomSheet>
