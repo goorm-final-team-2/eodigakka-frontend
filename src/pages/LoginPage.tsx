@@ -1,7 +1,19 @@
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
+
+import { getAppointment } from '@/api/appointment';
+import { ROUTES } from '@/constants/routes';
+import {
+  clearGuestAppointmentContext,
+  getGuestAppointmentContext,
+  saveGuestAppointmentContext,
+} from '@/utils/guestAppointmentContext';
+
 // eslint-disable-next-line no-restricted-syntax
 const KAKAO_BUTTON_STYLE = { backgroundColor: '#FEE500', color: '#191919' } as const;
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const restApiKey = import.meta.env.VITE_KAKAO_REST_API_KEY;
   // 카카오 디벨로퍼스에 등록한 Redirect URI (로컬 개발 서버 기준 주소)
   const redirectUri = `${window.location.origin}/oauth/kakao/callback`;
@@ -12,6 +24,30 @@ export default function LoginPage() {
   const handleKakaoLogin = () => {
     window.location.href = KAKAO_AUTH_URL;
   };
+
+  useEffect(() => {
+    if (localStorage.getItem('accessToken')) return;
+
+    const guestContext = getGuestAppointmentContext();
+    if (!guestContext) return;
+
+    let isActive = true;
+
+    getAppointment(guestContext.appointmentId)
+      .then((appointment) => {
+        if (!isActive) return;
+
+        saveGuestAppointmentContext(appointment.id, appointment.inviteCode);
+        navigate(ROUTES.ROOM.replace(':appointmentId', String(appointment.id)), { replace: true });
+      })
+      .catch(() => {
+        clearGuestAppointmentContext();
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col justify-center items-center px-6">

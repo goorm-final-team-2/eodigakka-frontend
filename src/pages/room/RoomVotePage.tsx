@@ -10,6 +10,10 @@ import { ROUTES } from '@/constants/routes';
 import { useAppointment } from '@/hooks/useAppointment';
 import { useCloseAppointment } from '@/hooks/useCloseAppointment';
 import { useLeaveAppointment } from '@/hooks/useLeaveAppointment';
+import {
+  clearGuestAppointmentContext,
+  saveGuestAppointmentContext,
+} from '@/utils/guestAppointmentContext';
 
 type Tab = 'vote' | 'location';
 
@@ -41,19 +45,8 @@ const RoomVotePage = () => {
     const hasAccessToken = Boolean(localStorage.getItem('accessToken'));
     if (hasAccessToken || !appointmentId || !appointment?.inviteCode) return;
 
-    const roomPath = ROUTES.ROOM.replace(':appointmentId', appointmentId);
-    window.history.pushState({ guestRoomBackGuard: true }, '', roomPath);
-
-    const handlePopState = () => {
-      navigate(roomPath, { replace: true });
-      window.history.pushState({ guestRoomBackGuard: true }, '', roomPath);
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [appointment?.inviteCode, appointmentId, navigate]);
+    saveGuestAppointmentContext(Number(appointmentId), appointment.inviteCode);
+  }, [appointment?.inviteCode, appointmentId]);
 
   if (!appointmentId) return null;
 
@@ -98,6 +91,7 @@ const RoomVotePage = () => {
         const inviteCode = appointment?.inviteCode;
         const hasAccessToken = Boolean(localStorage.getItem('accessToken'));
         if (!hasAccessToken && inviteCode) {
+          clearGuestAppointmentContext();
           navigate(ROUTES.INVITE.replace(':inviteCode', inviteCode));
           return;
         }

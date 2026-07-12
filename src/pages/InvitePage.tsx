@@ -10,6 +10,7 @@ import {
 } from '@/api/appointment';
 import { ROUTES } from '@/constants/routes';
 import { useAuthStore } from '@/stores/authStore';
+import { saveGuestAppointmentContext } from '@/utils/guestAppointmentContext';
 
 // eslint-disable-next-line no-restricted-syntax
 const KAKAO_BUTTON_STYLE = { backgroundColor: '#FEE500', color: '#191919' } as const;
@@ -44,6 +45,7 @@ export default function InvitePage() {
   const joinAsGuestMutation = useMutation({
     mutationFn: () => joinAppointmentAsGuest({ inviteCode, guestName: guestName.trim() }),
     onSuccess: (response) => {
+      saveGuestAppointmentContext(response.appointment.id, response.appointment.inviteCode);
       navigate(ROUTES.ROOM.replace(':appointmentId', String(response.appointment.id)), {
         replace: true,
       });
@@ -85,6 +87,7 @@ export default function InvitePage() {
     getAppointment(invite.appointmentId)
       .then((appointment) => {
         if (!isActive) return;
+        saveGuestAppointmentContext(appointment.id, appointment.inviteCode);
         navigate(ROUTES.ROOM.replace(':appointmentId', String(appointment.id)), { replace: true });
       })
       .catch(() => {
