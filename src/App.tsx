@@ -86,7 +86,7 @@ export default function App() {
               room.role === 'HOST' && (room.status === 'PLANNING' || room.status === 'CLOSED');
             const shouldShowCloseBeforeDeleteNotice =
               room.role === 'HOST' && room.status === 'CONFIRMED';
-            const shouldShowClosedNotice = room.role === 'HOST' && room.status === 'CLOSED';
+            const shouldShowClosedNotice = room.status === 'CLOSED';
 
             return (
               <div
