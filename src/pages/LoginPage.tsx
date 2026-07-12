@@ -26,8 +26,6 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    if (localStorage.getItem('accessToken')) return;
-
     const guestContext = getGuestAppointmentContext();
     if (!guestContext) return;
 
@@ -37,6 +35,7 @@ export default function LoginPage() {
       .then((appointment) => {
         if (!isActive) return;
 
+        localStorage.removeItem('accessToken');
         saveGuestAppointmentContext(appointment.id, appointment.inviteCode);
         navigate(ROUTES.ROOM.replace(':appointmentId', String(appointment.id)), { replace: true });
       })
