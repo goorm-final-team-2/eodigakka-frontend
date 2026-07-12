@@ -5,6 +5,21 @@ import AppointmentFormModal from '@/components/appointment/AppointmentFormModal'
 import { ROUTES } from '@/constants/routes';
 import { useAppointments, useDeleteAppointment } from '@/hooks/useAppointments';
 
+const statusLabel = {
+  PLANNING: '장소 추천 중',
+  CONFIRMED: '장소 확정',
+  CLOSED: '종료됨',
+} as const;
+
+const roleLabel = {
+  HOST: '방장',
+  MEMBER: '참여자',
+} as const;
+
+function formatAppointmentTime(time: string) {
+  return time.length >= 5 ? time.slice(0, 5) : time;
+}
+
 export default function App() {
   const { data: rooms = [], isLoading, isError } = useAppointments();
   const { mutate: deleteRoom, isPending: isDeleting } = useDeleteAppointment();
@@ -36,7 +51,7 @@ export default function App() {
           onClick={() => setIsModalOpen(true)}
           className="bg-primary text-on-primary px-3 py-1.5 rounded-pill text-sm font-medium shadow-sm transition-all active:scale-95"
         >
-          + 새 약속
+          + 약속 만들기
         </button>
       </div>
 
@@ -69,18 +84,46 @@ export default function App() {
               }}
               className="bg-canvas p-5 rounded-lg shadow-sm border border-hairline transition-all active:scale-95 cursor-pointer"
             >
-              <h3 className="text-base font-bold text-ink mb-1">{room.title}</h3>
-              <p className="text-xs text-ink-muted-48 mb-3">
-                {room.description ?? '방 설명이 없습니다.'}
-              </p>
-              <div className="flex flex-wrap gap-2 text-xs text-ink-muted-80">
-                <span className="bg-canvas-parchment px-2 py-1 rounded-sm">
-                  📅 {room.appointmentDate}
-                </span>
-                <span className="bg-canvas-parchment px-2 py-1 rounded-sm text-primary font-medium">
-                  📍 {room.preferredArea}
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-ink truncate">{room.title}</h3>
+                  <p className="mt-1 text-xs text-ink-muted-48 line-clamp-2">
+                    {room.description ?? '약속 설명이 없습니다.'}
+                  </p>
+                </div>
+                <span className="flex-none whitespace-nowrap rounded-pill bg-canvas-parchment px-3 py-1.5 text-xs font-semibold text-primary">
+                  {statusLabel[room.status]}
                 </span>
               </div>
+
+              <div className="grid gap-2 text-xs text-ink-muted-80">
+                <div className="flex items-center gap-2 rounded-sm bg-canvas-parchment px-3 py-2">
+                  <span>📅</span>
+                  <span className="font-medium text-ink">
+                    {room.appointmentDate} {formatAppointmentTime(room.appointmentTime)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 rounded-sm bg-canvas-parchment px-3 py-2">
+                  <span>📍</span>
+                  <span className="font-medium text-primary">
+                    {room.preferredArea ?? '선호 지역 미정'}
+                  </span>
+                </div>
+                {room.notice && (
+                  <div className="flex items-start gap-2 rounded-sm bg-canvas-parchment px-3 py-2">
+                    <span className="font-semibold text-ink-muted-48">공지</span>
+                    <span className="line-clamp-2">{room.notice}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+                <span className="rounded-pill border border-hairline px-2 py-1 text-ink-muted-48">
+                  {roleLabel[room.role]}
+                </span>
+                <span className="font-semibold text-primary">약속방 보기 →</span>
+              </div>
+
               {room.role === 'HOST' && (
                 <div className="mt-3 flex justify-end">
                   <button
