@@ -9,6 +9,7 @@ import PlaceCandidateSheet from '@/components/vote/PlaceCandidateSheet';
 import { ROUTES } from '@/constants/routes';
 import { useAppointment } from '@/hooks/useAppointment';
 import { useCloseAppointment } from '@/hooks/useCloseAppointment';
+import { useLeaveAppointment } from '@/hooks/useLeaveAppointment';
 
 type Tab = 'vote' | 'location';
 
@@ -23,12 +24,18 @@ const RoomVotePage = () => {
   const [copied, setCopied] = useState(false);
   const [isManageMenuOpen, setIsManageMenuOpen] = useState(false);
   const [isCloseDialogOpen, setIsCloseDialogOpen] = useState(false);
+  const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
 
   const { data: appointment } = useAppointment(Number(appointmentId));
   const { mutate: closeAppointment, isPending: isClosingAppointment } = useCloseAppointment(
     Number(appointmentId),
   );
+  const { mutate: leaveAppointment, isPending: isLeavingAppointment } = useLeaveAppointment(
+    Number(appointmentId),
+  );
   const canCloseAppointment = appointment?.role === 'HOST' && appointment?.status === 'CONFIRMED';
+  const canLeaveAppointment = appointment?.role === 'MEMBER';
+  const canManageAppointment = canCloseAppointment || canLeaveAppointment;
 
   if (!appointmentId) return null;
 
@@ -56,6 +63,22 @@ const RoomVotePage = () => {
     });
   };
 
+  const handleLeaveAppointment = () => {
+    leaveAppointment(undefined, {
+      onSuccess: () => {
+        setIsLeaveDialogOpen(false);
+        setIsManageMenuOpen(false);
+        const inviteCode = appointment?.inviteCode;
+        const hasAccessToken = Boolean(localStorage.getItem('accessToken'));
+        if (!hasAccessToken && inviteCode) {
+          navigate(ROUTES.INVITE.replace(':inviteCode', inviteCode));
+          return;
+        }
+        navigate(ROUTES.HOME);
+      },
+    });
+  };
+
   return (
     <div className="fixed inset-0 bg-canvas-parchment">
       <ConfirmDialog
@@ -66,6 +89,15 @@ const RoomVotePage = () => {
         cancelLabel="취소"
         onConfirm={handleCloseAppointment}
         onCancel={() => setIsCloseDialogOpen(false)}
+      />
+      <ConfirmDialog
+        isOpen={isLeaveDialogOpen}
+        title="약속방을 나갈까요?"
+        description="나가면 이 약속방 목록과 참여자 목록에서 제외됩니다. 초대 링크가 있으면 다시 참여할 수 있습니다."
+        confirmLabel={isLeavingAppointment ? '나가는 중...' : '나가기'}
+        cancelLabel="취소"
+        onConfirm={handleLeaveAppointment}
+        onCancel={() => setIsLeaveDialogOpen(false)}
       />
 
       {/* 지도 (전체 화면) */}
@@ -140,7 +172,7 @@ const RoomVotePage = () => {
               <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
             </svg>
           </button>
-          {canCloseAppointment && (
+          {canManageAppointment && (
             <button
               type="button"
               onClick={() => setIsManageMenuOpen((prev) => !prev)}
@@ -169,17 +201,29 @@ const RoomVotePage = () => {
               링크 복사됨
             </span>
           )}
-          {canCloseAppointment && isManageMenuOpen && (
+          {canManageAppointment && isManageMenuOpen && (
             <div className="absolute right-0 top-11 w-44 rounded-xl border border-hairline bg-canvas p-2 shadow-lg">
               <p className="px-3 py-2 text-xs font-semibold text-ink-muted-48">약속 관리</p>
-              <button
-                type="button"
-                onClick={() => setIsCloseDialogOpen(true)}
-                disabled={isClosingAppointment}
-                className="w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-primary hover:bg-canvas-parchment disabled:opacity-50"
-              >
-                {isClosingAppointment ? '종료 중...' : '약속 종료하기'}
-              </button>
+              {canCloseAppointment && (
+                <button
+                  type="button"
+                  onClick={() => setIsCloseDialogOpen(true)}
+                  disabled={isClosingAppointment}
+                  className="w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-primary hover:bg-canvas-parchment disabled:opacity-50"
+                >
+                  {isClosingAppointment ? '종료 중...' : '약속 종료하기'}
+                </button>
+              )}
+              {canLeaveAppointment && (
+                <button
+                  type="button"
+                  onClick={() => setIsLeaveDialogOpen(true)}
+                  disabled={isLeavingAppointment}
+                  className="w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-ink hover:bg-canvas-parchment disabled:opacity-50"
+                >
+                  {isLeavingAppointment ? '나가는 중...' : '약속방 나가기'}
+                </button>
+              )}
             </div>
           )}
         </div>
