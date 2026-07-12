@@ -39,6 +39,15 @@ const RoomVotePage = () => {
 
   if (!appointmentId) return null;
 
+  const handleBack = () => {
+    const hasAccessToken = Boolean(localStorage.getItem('accessToken'));
+    if (!hasAccessToken && appointment?.inviteCode) {
+      navigate(ROUTES.INVITE.replace(':inviteCode', appointment.inviteCode), { replace: true });
+      return;
+    }
+    navigate(ROUTES.HOME);
+  };
+
   const handleShare = () => {
     setIsManageMenuOpen(false);
     const inviteCode = appointment?.inviteCode;
@@ -106,11 +115,7 @@ const RoomVotePage = () => {
       {/* 상단 헤더: 뒤로가기 | 탭 | 초대 공유/약속 관리 */}
       <div className="fixed top-0 inset-x-0 z-20 flex items-start justify-between pt-safe px-4 pointer-events-none">
         {/* 좌상단 — 메인으로 */}
-        <button
-          onClick={() => navigate(ROUTES.HOME)}
-          className={`${btnClass} mt-3`}
-          aria-label="메인으로"
-        >
+        <button onClick={handleBack} className={`${btnClass} mt-3`} aria-label="이전 화면으로">
           <svg
             width="18"
             height="18"
