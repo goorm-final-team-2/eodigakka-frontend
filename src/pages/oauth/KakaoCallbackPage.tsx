@@ -33,7 +33,9 @@ export default function KakaoCallbackPage() {
             joinAppointment({ inviteCode: pendingInviteCode })
               .then((appointment) => {
                 sessionStorage.removeItem('pending_invite_code');
-                navigate(ROUTES.ROOM.replace(':appointmentId', String(appointment.id)));
+                navigate(ROUTES.ROOM.replace(':appointmentId', String(appointment.id)), {
+                  replace: true,
+                });
               })
               .catch((error) => {
                 sessionStorage.removeItem('pending_invite_code');
@@ -44,7 +46,7 @@ export default function KakaoCallbackPage() {
             return;
           }
           // 메인 페이지(약속방 목록 등)로 이동
-          navigate('/');
+          navigate('/', { replace: true });
         })
         .catch((error) => {
           sessionStorage.removeItem('kakao_processed_code');
