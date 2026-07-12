@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
 import BottomSheet, { type SnapPoint } from '@/components/common/BottomSheet';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { LocationBottomSheet } from '@/components/location/LocationBottomSheet';
 import KakaoMap from '@/components/map/KakaoMap';
 import PlaceCandidateSheet from '@/components/vote/PlaceCandidateSheet';
 import { ROUTES } from '@/constants/routes';
 import { useAppointment } from '@/hooks/useAppointment';
+import { useCloseAppointment } from '@/hooks/useCloseAppointment';
 
 type Tab = 'vote' | 'location';
 
@@ -19,12 +21,19 @@ const RoomVotePage = () => {
   const [snap, setSnap] = useState<SnapPoint>('hidden');
   const [tab, setTab] = useState<Tab>('vote');
   const [copied, setCopied] = useState(false);
+  const [isManageMenuOpen, setIsManageMenuOpen] = useState(false);
+  const [isCloseDialogOpen, setIsCloseDialogOpen] = useState(false);
 
   const { data: appointment } = useAppointment(Number(appointmentId));
+  const { mutate: closeAppointment, isPending: isClosingAppointment } = useCloseAppointment(
+    Number(appointmentId),
+  );
+  const canCloseAppointment = appointment?.role === 'HOST' && appointment?.status === 'CONFIRMED';
 
   if (!appointmentId) return null;
 
   const handleShare = () => {
+    setIsManageMenuOpen(false);
     const inviteCode = appointment?.inviteCode;
     if (!inviteCode) return;
     const url = `${window.location.origin}${ROUTES.INVITE.replace(':inviteCode', inviteCode)}`;
@@ -38,12 +47,31 @@ const RoomVotePage = () => {
     }
   };
 
+  const handleCloseAppointment = () => {
+    closeAppointment(undefined, {
+      onSuccess: () => {
+        setIsCloseDialogOpen(false);
+        setIsManageMenuOpen(false);
+      },
+    });
+  };
+
   return (
     <div className="fixed inset-0 bg-canvas-parchment">
+      <ConfirmDialog
+        isOpen={isCloseDialogOpen}
+        title="약속을 종료할까요?"
+        description="종료 후에는 위치 공유와 약속 진행 기능을 사용할 수 없습니다."
+        confirmLabel={isClosingAppointment ? '종료 중...' : '약속 종료'}
+        cancelLabel="취소"
+        onConfirm={handleCloseAppointment}
+        onCancel={() => setIsCloseDialogOpen(false)}
+      />
+
       {/* 지도 (전체 화면) */}
       <KakaoMap />
 
-      {/* 상단 헤더: 뒤로가기 | 탭 | 초대 공유 */}
+      {/* 상단 헤더: 뒤로가기 | 탭 | 초대 공유/약속 관리 */}
       <div className="fixed top-0 inset-x-0 z-20 flex items-start justify-between pt-safe px-4 pointer-events-none">
         {/* 좌상단 — 메인으로 */}
         <button
@@ -87,8 +115,8 @@ const RoomVotePage = () => {
           </button>
         </div>
 
-        {/* 우상단 — 초대 링크 공유 */}
-        <div className="relative mt-3">
+        {/* 우상단 — 초대 링크 공유 / 약속 관리 */}
+        <div className="relative mt-3 flex gap-2 pointer-events-auto">
           <button
             onClick={handleShare}
             className={btnClass}
@@ -112,10 +140,47 @@ const RoomVotePage = () => {
               <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
             </svg>
           </button>
+          {canCloseAppointment && (
+            <button
+              type="button"
+              onClick={() => setIsManageMenuOpen((prev) => !prev)}
+              className={btnClass}
+              aria-label="약속 관리"
+              aria-expanded={isManageMenuOpen}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="1" />
+                <circle cx="19" cy="12" r="1" />
+                <circle cx="5" cy="12" r="1" />
+              </svg>
+            </button>
+          )}
           {copied && (
             <span className="absolute top-10 right-0 whitespace-nowrap text-xs font-medium bg-surface-tile-1/90 text-on-dark px-2 py-1 rounded-md shadow">
               링크 복사됨
             </span>
+          )}
+          {canCloseAppointment && isManageMenuOpen && (
+            <div className="absolute right-0 top-11 w-44 rounded-xl border border-hairline bg-canvas p-2 shadow-lg">
+              <p className="px-3 py-2 text-xs font-semibold text-ink-muted-48">약속 관리</p>
+              <button
+                type="button"
+                onClick={() => setIsCloseDialogOpen(true)}
+                disabled={isClosingAppointment}
+                className="w-full rounded-lg px-3 py-2 text-left text-sm font-semibold text-primary hover:bg-canvas-parchment disabled:opacity-50"
+              >
+                {isClosingAppointment ? '종료 중...' : '약속 종료하기'}
+              </button>
+            </div>
           )}
         </div>
       </div>
